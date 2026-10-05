@@ -209,15 +209,15 @@
             </div>
         </section>
 
-        <!-- TAB 4: KHO TỪ & BỘ MỞ RỘNG SIÊU TỐC -->
+        <!-- TAB 4: KHO TỪ & BỘ MỞ RỘNG TÙY CHỈNH GIỚI TỪ THEO TỪ GỐC -->
         <section id="view-input" class="space-y-6 hidden">
             <div class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-sm border-2 border-indigo-200 p-5 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Gốc từ & Giới từ Siêu tốc (IELTS 8.0 / SAT 1500)</h2>
-                        <p class="text-xs text-slate-500">Nhập 1 từ hoặc nhiều từ cách nhau bằng dấu phẩy. Hệ thống sẽ tự động phân loại từ và lọc giới từ đi kèm.</p>
+                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Gốc từ & Giới từ Tùy biến (IELTS 8.0 / SAT 1500)</h2>
+                        <p class="text-xs text-slate-500">Tự động nhận diện mọi giới từ đi kèm theo từng từ gốc và tách dòng riêng nếu khác nghĩa.</p>
                     </div>
-                    <button onclick="switchTab('sync')" class="text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold">⚙️ Cài AI Key</button>
+                    <button onclick="switchTab('sync')" id="aiStatusBtn" class="text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold">⚙️ Cài AI Key</button>
                 </div>
 
                 <div class="space-y-2">
@@ -241,7 +241,7 @@
                         </label>
                         <label class="cursor-pointer">
                             <input type="checkbox" id="chkPrep" checked class="hidden chip-check">
-                            <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">🔗 Kèm Giới từ (in/on/with/to...)</span>
+                            <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">🔗 Tùy biến Giới từ theo từ gốc</span>
                         </label>
                         <label class="cursor-pointer">
                             <input type="checkbox" id="chkColloc" checked class="hidden chip-check">
@@ -251,7 +251,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
-                    <input type="text" id="rootWordInput" placeholder="Gõ từ (VD: conform hoặc conform, mitigate, allocate)..." class="flex-1 rounded-xl border border-indigo-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="rootWordInput" placeholder="Gõ từ gốc (VD: adapt, contend, conform, account)..." class="flex-1 rounded-xl border border-indigo-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
                     <button onclick="expandRootWord()" id="expandBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm transition whitespace-nowrap">
                         ⚡ Khai triển từ ngay
                     </button>
@@ -266,7 +266,7 @@
                         <button onclick="clearAllWords()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-3 py-1.5 rounded-lg">Xóa sạch kho</button>
                     </div>
                 </div>
-                <textarea id="bulkInput" rows="6" placeholder="comply (v) [+ with] - tuân thủ, làm theo quy định&#10;compliance (n) [+ with] - sự tuân thủ" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
+                <textarea id="bulkInput" rows="6" placeholder="adapt (v) [+ to] - thích nghi với hoàn cảnh mới&#10;adapt (v) [+ for] - cải biên để phù hợp với mục đích mới&#10;adapt (v) [+ from] - chuyển thể từ tác phẩm gốc" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
                 <div class="mt-3 flex justify-end">
                     <button onclick="addBulkWords()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-sm">📥 Lưu tất cả vào kho từ</button>
                 </div>
@@ -285,13 +285,14 @@
         <section id="view-sync" class="space-y-6 hidden">
             <div class="bg-white rounded-2xl shadow-sm border-2 border-purple-500 p-5 space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-bold text-purple-950 text-base">🤖 Mã Gemini AI (Để khai triển Loại từ, Giới từ & Nghĩa tiếng Việt)</h2>
+                    <h2 class="font-bold text-purple-950 text-base">🤖 Mã Gemini AI (Khai triển Loại từ, Giới từ & Nghĩa tiếng Việt)</h2>
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-lg hover:bg-purple-200">Lấy Key miễn phí ↗</a>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="password" id="geminiKeyInput" placeholder="Dán mã AIzaSy... vào đây" class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono outline-none">
+                    <input type="text" id="geminiKeyInput" placeholder="Dán mã AIzaSy... vào đây" class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono outline-none">
                     <button onclick="saveGeminiKey()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-5 py-2 rounded-xl text-sm">Lưu AI Key</button>
                 </div>
+                <p id="geminiKeyStatus" class="text-xs text-slate-500"></p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border-2 border-indigo-500 p-5 space-y-4">
@@ -465,8 +466,11 @@
             renderUnlearnedList();
 
             cloudKey = localStorage.getItem(CLOUD_KEY_STORAGE) || '';
-            geminiKey = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
-            if (geminiKey) document.getElementById('geminiKeyInput').value = geminiKey;
+            geminiKey = (localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
+            if (geminiKey) {
+                document.getElementById('geminiKeyInput').value = geminiKey;
+                updateAIKeyStatusUI();
+            }
 
             if (cloudKey) {
                 document.getElementById('cloudKeyInput').value = cloudKey;
@@ -475,16 +479,45 @@
             }
         });
 
+        function updateAIKeyStatusUI() {
+            const btn = document.getElementById('aiStatusBtn');
+            const st = document.getElementById('geminiKeyStatus');
+            if (geminiKey) {
+                if (btn) {
+                    btn.textContent = '✅ Đã có AI Key';
+                    btn.className = 'text-[11px] bg-emerald-50 border border-emerald-300 text-emerald-700 px-2.5 py-1 rounded-lg font-bold';
+                }
+                if (st) st.textContent = '✅ Đã lưu mã AI Key trên thiết bị này.';
+            } else {
+                if (btn) {
+                    btn.textContent = '⚙️ Cài AI Key';
+                    btn.className = 'text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold';
+                }
+                if (st) st.textContent = 'Chưa lưu AI Key.';
+            }
+        }
+
         function saveGeminiKey() {
             geminiKey = document.getElementById('geminiKeyInput').value.trim();
             localStorage.setItem(GEMINI_KEY_STORAGE, geminiKey);
+            updateAIKeyStatusUI();
             showToast('✅ Đã lưu mã Gemini AI Key!');
         }
 
-        // TÍNH NĂNG MỞ RỘNG SIÊU TỐC (THINKING BUDGET = 0 + CACHE)
+        // BỘ KHAI TRIỂN TÙY CHỈNH GIỚI TỪ THEO TỪNG TỪ GỐC & TÁCH DÒNG THEO NGHĨA
         async function expandRootWord() {
             const rawInput = document.getElementById('rootWordInput').value.trim();
             if (!rawInput) return showToast('⚠️ Hãy nhập từ tiếng Anh cần mở rộng!');
+
+            if (!geminiKey) {
+                geminiKey = (document.getElementById('geminiKeyInput').value || localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
+            }
+
+            if (!geminiKey) {
+                showToast('⚠️ Bạn chưa lưu mã Gemini AI Key ở mục 🔑 Key!');
+                switchTab('sync');
+                return;
+            }
 
             const wantN = document.getElementById('chkNoun').checked;
             const wantV = document.getElementById('chkVerb').checked;
@@ -494,10 +527,10 @@
             const wantColloc = document.getElementById('chkColloc').checked;
 
             const posSelected = [];
-            if (wantN) posSelected.push('n');
-            if (wantV) posSelected.push('v');
-            if (wantAdj) posSelected.push('adj');
-            if (wantAdv) posSelected.push('adv');
+            if (wantN) posSelected.push('Danh từ (n)');
+            if (wantV) posSelected.push('Động từ (v)');
+            if (wantAdj) posSelected.push('Tính từ (adj)');
+            if (wantAdv) posSelected.push('Trạng từ (adv)');
 
             if (posSelected.length === 0 && !wantColloc) {
                 return showToast('⚠️ Hãy tích chọn ít nhất 1 loại từ!');
@@ -514,80 +547,60 @@
 
             const btn = document.getElementById('expandBtn');
             btn.disabled = true;
-            btn.textContent = '⚡ Đang xử lý siêu tốc...';
+            btn.textContent = '⚡ Đang phân tích...';
 
-            if (geminiKey) {
+            const prompt = 'Bạn là chuyên gia ngôn ngữ IELTS 8.0 và SAT 1500+. Hãy khai triển (các) từ gốc: "' + rawInput + '".' + NL +
+                '1. Lấy Word Family thuộc các loại từ đã chọn: ' + posSelected.join(', ') + '.' + NL +
+                (wantPrep 
+                    ? '2. TUYỆT ĐỐI QUAN TRỌNG VỀ GIỚI TỪ: Với mỗi từ, hãy xác định TẤT CẢ các giới từ đặc trưng đi kèm với nó (bất kỳ giới từ nào như from, against, into, upon, over, between, through, about, of, for, to, with, at, on, in, under, towards...). Nếu một từ khi đi với các giới từ khác nhau sẽ mang sắc thái nghĩa hoặc tân ngữ khác nhau (ví dụ adapt [+ to] vs adapt [+ for] vs adapt [+ from], hoặc contend [+ with] vs contend [+ for]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG cho từng giới từ để phân biệt rõ nghĩa! Nếu từ đó là ngoại động từ dùng trực tiếp không cần giới từ thì ghi [+ N].' 
+                    : '2. Ghi rõ ký hiệu loại từ (n), (v), (adj), (adv).') + NL +
+                (wantColloc ? '3. Thêm 2-3 cụm Collocations học thuật đắt giá nhất gắn với từ này.' : '') + NL +
+                '4. Chỉ xuất kết quả, mỗi mục 1 dòng đúng cú pháp: từ_tiếng_Anh (loại_từ) [+ giới_từ_cụ_thể] - nghĩa_tiếng_Việt_tương_ứng. Không đánh số thứ tự, không dùng dấu *.';
+
+            const modelsToTry = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+            let successText = '';
+            let lastErrorMsg = '';
+
+            for (const modelName of modelsToTry) {
                 try {
-                    const prompt = 'Khai triển (các) từ gốc: "' + rawInput + '" chuẩn IELTS 8.0/SAT 1500.' + NL +
-                        '- Lấy Word Family thuộc loại từ: ' + posSelected.join(', ') + '.' + NL +
-                        (wantPrep ? '- Ghi giới từ đi kèm trong ngoặc vuông sau loại từ: VD comply (v) [+ with] - tuân thủ. Nếu ngoại động từ không giới từ thì ghi [+ N].' : '- Ghi loại từ (n)/(v)/(adj)/(adv).') + NL +
-                        (wantColloc ? '- Thêm 2 cụm Collocations học thuật đắt giá nhất cho mỗi từ gốc.' : '') + NL +
-                        '- Chỉ xuất kết quả, mỗi mục 1 dòng đúng định dạng: từ (loại_từ) [+ giới_từ] - nghĩa_tiếng_Việt_ngắn_gọn. Không đánh số, không dùng dấu *.';
-
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + geminiKey, {
+                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + encodeURIComponent(geminiKey), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: {
-                                temperature: 0.2,
-                                maxOutputTokens: 600,
-                                thinkingConfig: { thinkingBudget: 0 } // Tắt suy nghĩ ngầm -> Tốc độ phản hồi cực nhanh
-                            }
+                            generationConfig: { temperature: 0.2, maxOutputTokens: 700 }
                         })
                     });
                     const data = await res.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                    if (!text) throw new Error('Empty');
-
-                    const cleaned = text.split(NL).map(l => l.replace(/^[\*\-\d\.\s]+/, '').trim()).filter(l => l.includes(' - ')).join(NL);
-                    expandCache[cacheKey] = cleaned;
-                    const box = document.getElementById('bulkInput');
-                    box.value = (box.value ? box.value + NL : '') + cleaned;
-                    document.getElementById('rootWordInput').value = '';
-                    showToast('⚡ Đã khai triển xong trong chớp mắt!');
+                    if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        successText = data.candidates[0].content.parts[0].text;
+                        break;
+                    } else {
+                        lastErrorMsg = data.error?.message || ('HTTP ' + res.status);
+                    }
                 } catch (err) {
-                    await fallbackDictionaryExpand(rawInput.split(',')[0].trim(), wantN, wantV, wantAdj, wantAdv, wantPrep);
+                    lastErrorMsg = err.message;
                 }
+            }
+
+            if (successText) {
+                const cleaned = successText.split(NL)
+                    .map(l => l.replace(/^[\*\-\d\.\s]+/, '').replace(/\*\*/g, '').trim())
+                    .filter(l => l.includes(' - ') || l.includes(': '))
+                    .join(NL);
+
+                const finalOutput = cleaned || successText.trim();
+                expandCache[cacheKey] = finalOutput;
+                const box = document.getElementById('bulkInput');
+                box.value = (box.value ? box.value + NL : '') + finalOutput;
+                document.getElementById('rootWordInput').value = '';
+                showToast('⚡ Đã khai triển thành công theo từng giới từ!');
             } else {
-                await fallbackDictionaryExpand(rawInput.split(',')[0].trim(), wantN, wantV, wantAdj, wantAdv, wantPrep);
+                showToast('❌ Lỗi AI Key: ' + lastErrorMsg);
             }
 
             btn.disabled = false;
             btn.textContent = '⚡ Khai triển từ ngay';
-        }
-
-        async function fallbackDictionaryExpand(word, wantN, wantV, wantAdj, wantAdv, wantPrep) {
-            const NL = String.fromCharCode(10);
-            const results = [];
-            try {
-                const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word));
-                if (res.ok) {
-                    const data = await res.json();
-                    const meanings = data[0]?.meanings || [];
-                    meanings.forEach(m => {
-                        const pos = m.partOfSpeech;
-                        const def = m.definitions?.[0]?.definition || '';
-                        const ex = m.definitions?.[0]?.example || '';
-                        let prepHint = '';
-                        if (wantPrep && ex) {
-                            const prepMatch = ex.match(new RegExp(word + '\\w*\\s+(with|to|for|in|on|of|from|about|into|over|against)\\b', 'i'));
-                            if (prepMatch) prepHint = ' [+ ' + prepMatch[1].toLowerCase() + ']';
-                        }
-                        if ((pos === 'noun' && wantN) || (pos === 'verb' && wantV) || (pos === 'adjective' && wantAdj) || (pos === 'adverb' && wantAdv)) {
-                            const shortPos = pos === 'noun' ? '(n)' : pos === 'verb' ? '(v)' : pos === 'adjective' ? '(adj)' : '(adv)';
-                            results.push(word + ' ' + shortPos + prepHint + ' - ' + def);
-                        }
-                    });
-                }
-            } catch (e) {}
-
-            if (results.length === 0) {
-                results.push(word + ' - (Hãy dán AI Key ở mục 🔑 Key để tự dịch Tiếng Việt & lấy đủ họ từ siêu tốc)');
-            }
-            const box = document.getElementById('bulkInput');
-            box.value = (box.value ? box.value + NL : '') + results.join(NL);
-            showToast('ℹ️ Đã lấy từ điển cơ bản!');
         }
 
         // CLOUD SYNC ENGINE
@@ -698,7 +711,7 @@
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0');
-            setTimeout(() => t.classList.add('opacity-0'), 2500);
+            setTimeout(() => t.classList.add('opacity-0'), 2800);
         }
 
         function saveToStorage() {
@@ -733,6 +746,7 @@
             if (tab === 'flashcard') initFlashcards();
             if (tab === 'test') startNewTest();
             if (tab === 'unlearned') renderUnlearnedList();
+            if (tab === 'input') updateAIKeyStatusUI();
         }
 
         // FLASHCARD
@@ -1056,10 +1070,10 @@
         function loadSampleWords() {
             const NL = String.fromCharCode(10);
             const sample = [
+                "adapt (v) [+ to] - thích nghi với môi trường mới",
+                "adapt (v) [+ for] - cải biên để phù hợp với mục đích mới",
                 "conform (v) [+ to / with] - tuân theo quy chuẩn xã hội",
-                "conformity (n) [+ to / with] - sự tuân thủ, tâm lý đám đông",
                 "mitigate (v) [+ N] - giảm thiểu rủi ro, xoa dịu hậu quả",
-                "allocate (v) [+ to / for] - phân bổ nguồn lực",
                 "resilient (adj) [+ to] - kiên cường, có sức chống chịu trước"
             ].join(NL);
             document.getElementById('bulkInput').value = sample;
