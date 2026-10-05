@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VocabMaster v4.0 - IELTS 8.0 & SAT 1500+</title>
+    <title>VocabMaster v5.0 - IELTS 8.0 & SAT 1500+</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VocabMaster">
@@ -21,7 +21,7 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
-        input, textarea { user-select: text; }
+        input, textarea, select { user-select: text; }
         .option-btn { transition: all 0.15s ease-in-out; }
         .option-btn:active { transform: scale(0.98); }
         .perspective-1000 { perspective: 1000px; }
@@ -38,13 +38,13 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-30">
-        <div class="max-w-4xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="max-w-5xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-2">
                 <div class="bg-white/20 px-2.5 py-1.5 rounded-xl font-extrabold text-lg">V</div>
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="font-bold text-base sm:text-lg leading-tight">VocabMaster</h1>
-                        <span class="text-[10px] bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-extrabold">v4.0</span>
+                        <span class="text-[10px] bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-extrabold">v5.0</span>
                         <button onclick="toggleAccent()" id="accentBtn" class="text-[11px] bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded-full font-bold transition">
                             🇺🇸 Giọng US
                         </button>
@@ -63,14 +63,17 @@
                         <span>Chưa thuộc</span>
                         <span id="unlearnedBadge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
                     </button>
-                    <button onclick="switchTab('input')" id="tab-input" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">➕ Kho từ</button>
+                    <button onclick="switchTab('bank')" id="tab-bank" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap flex items-center space-x-1">
+                        <span>🏦 Ngân hàng</span>
+                    </button>
+                    <button onclick="switchTab('input')" id="tab-input" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">➕ Thêm từ</button>
                     <button onclick="switchTab('sync')" id="tab-sync" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">🔑 Key</button>
                 </nav>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6">
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-6">
 
         <!-- TAB 1: FLASHCARD 3D -->
         <section id="view-flashcard" class="space-y-5">
@@ -78,6 +81,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <select id="fcFilter" onchange="initFlashcards()" class="text-xs sm:text-sm bg-indigo-50 text-indigo-700 rounded-xl px-3 py-2 font-semibold">
                         <option value="all">Tất cả kho từ</option>
+                        <option value="bank">🏦 Theo bộ lọc ở Ngân hàng từ</option>
                         <option value="expanded">✨ Chỉ từ Mở rộng (Họ từ / Giới từ)</option>
                         <option value="wrong">🔥 Chỉ ôn từ chưa thuộc</option>
                     </select>
@@ -88,10 +92,10 @@
 
             <div class="w-full max-w-md mx-auto perspective-1000 h-80 cursor-pointer" onclick="flipCard()">
                 <div id="flashcardElement" class="relative w-full h-full transform-style-3d transition-transform duration-500 rounded-3xl shadow-md border border-slate-200">
-                    <div class="absolute inset-0 w-full h-full backface-hidden bg-white rounded-3xl p-8 flex flex-col justify-between items-center text-center border-b-4 border-indigo-500">
-                        <div class="w-full flex justify-between items-center text-xs text-slate-400 font-semibold">
-                            <span id="fcPhonetic" class="font-mono text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md">MẶT TRƯỚC</span>
-                            <span class="text-slate-400">Chạm để lật nghĩa 👆</span>
+                    <div class="absolute inset-0 w-full h-full backface-hidden bg-white rounded-3xl p-7 flex flex-col justify-between items-center text-center border-b-4 border-indigo-500">
+                        <div class="w-full flex justify-between items-center text-xs text-slate-400 font-semibold gap-2">
+                            <span id="fcPhonetic" class="font-mono text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md truncate">MẶT TRƯỚC</span>
+                            <span id="fcMetaBadge" class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md truncate"></span>
                         </div>
                         <div class="space-y-4 my-auto">
                             <h2 id="fcTerm" class="text-2xl sm:text-3xl font-extrabold text-slate-800 break-words">...</h2>
@@ -99,10 +103,10 @@
                                 🔊 Nghe phát âm
                             </button>
                         </div>
-                        <p class="text-xs text-slate-400">Chú ý loại từ và giới từ đi kèm</p>
+                        <p class="text-xs text-slate-400">Chạm vào thẻ để lật xem nghĩa 👆</p>
                     </div>
 
-                    <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-indigo-50 rounded-3xl p-8 flex flex-col justify-between items-center text-center border-b-4 border-emerald-500">
+                    <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-indigo-50 rounded-3xl p-7 flex flex-col justify-between items-center text-center border-b-4 border-emerald-500">
                         <div class="w-full flex justify-between items-center text-xs text-slate-400 font-semibold">
                             <span>MẶT SAU</span>
                             <span class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Nghĩa & Cấu trúc</span>
@@ -127,7 +131,7 @@
             </div>
         </section>
 
-        <!-- TAB 2: TEST ĐA CHẾ ĐỘ (CÓ TEST GIỚI TỪ & LOẠI TỪ MỞ RỘNG) -->
+        <!-- TAB 2: TEST ĐA CHẾ ĐỘ -->
         <section id="view-test" class="space-y-5 hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2">
@@ -140,6 +144,7 @@
                     </select>
                     <select id="testFilter" onchange="startNewTest()" class="text-xs sm:text-sm bg-indigo-50 text-indigo-700 rounded-xl px-3 py-2 font-semibold">
                         <option value="all">🎲 Kho chung (Ngẫu nhiên)</option>
+                        <option value="bank">🏦 Bộ đang chọn ở Ngân hàng từ</option>
                         <option value="expanded">✨ Bộ từ Mở rộng (Họ từ & Giới từ)</option>
                         <option value="wrong">🔥 Bộ từ chưa thuộc</option>
                     </select>
@@ -215,15 +220,75 @@
             </div>
         </section>
 
-        <!-- TAB 4: KHO TỪ & BỘ MỞ RỘNG TÙY CHỈNH GIỚI TỪ THEO TỪ GỐC -->
+        <!-- TAB 4: NGÂN HÀNG KHO TỪ (PHÂN NHÓM VOCAB / PHRASAL VERBS / COLLOCATIONS & CHỦ ĐỀ) -->
+        <section id="view-bank" class="space-y-5 hidden">
+            <!-- Tầng 1: Chia theo Phần (Loại mục từ) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-base sm:text-lg">🏦 Ngân hàng Từ vựng Phân tầng</h2>
+                        <p class="text-xs text-slate-500">Chọn Phần (Vocab, Cụm động từ, Collocations) và Chủ đề bên dưới để lọc học riêng hoặc làm bài Test.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="autoClassifyOldWordsWithAI()" id="aiClassifyBtn" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold px-3 py-2 rounded-xl transition">
+                            🪄 AI Tự chia Chủ đề cho từ cũ
+                        </button>
+                        <button onclick="promptNewTopic()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-2 rounded-xl transition">
+                            + Tạo chủ đề mới
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Các Thẻ Nhóm Lớn (Categories) -->
+                <div>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">1. Chọn Phần (Nhóm từ):</span>
+                    <div id="bankCategoryTabs" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mt-2"></div>
+                </div>
+
+                <!-- Tầng 2: Chia theo Chủ đề (Topics) -->
+                <div class="pt-2 border-t border-slate-100">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">2. Chia theo Chủ đề (Topics):</span>
+                    <div id="bankTopicChips" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
+                <!-- Thanh công cụ Học & Test trực tiếp bộ đang lọc -->
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-indigo-50/60 p-3.5 rounded-xl">
+                    <div class="text-xs sm:text-sm font-bold text-indigo-950">
+                        Đang hiển thị: <span id="bankCurrentFilterLabel" class="text-indigo-600">Tất cả (0 từ)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="studyCurrentBankFilter('flashcard')" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm">
+                            🃏 Học Flashcard phần này
+                        </button>
+                        <button onclick="studyCurrentBankFilter('test')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm">
+                            📝 Test 20 câu phần này →
+                        </button>
+                        <button onclick="studyCurrentBankFilter('prep')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm">
+                            🔗 Test Giới từ phần này
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách từ trong phần đang chọn -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base">Danh sách từ trong mục đang chọn (<span id="bankFilteredCount">0</span>)</h3>
+                    <input type="text" id="bankSearchInput" oninput="renderBankView()" placeholder="Tìm kiếm trong mục này..." class="w-full sm:w-64 px-3 py-1.5 text-sm border border-slate-300 rounded-xl outline-none">
+                </div>
+                <div id="bankListContainer" class="divide-y divide-slate-100 max-h-[460px] overflow-y-auto pr-1"></div>
+            </div>
+        </section>
+
+        <!-- TAB 5: THÊM TỪ & KHAI TRIỂN AI -->
         <section id="view-input" class="space-y-6 hidden">
             <div class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-sm border-2 border-indigo-200 p-5 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Họ từ, Loại từ & Giới từ Tùy biến (Chuẩn Gemini 3.8)</h2>
-                        <p class="text-xs text-slate-500">Tự động nhận diện mọi giới từ đi kèm theo từng từ gốc và tách dòng riêng nếu khác nghĩa.</p>
+                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Họ từ, Cụm động từ & Giới từ (Chuẩn Gemini 3.8)</h2>
+                        <p class="text-xs text-slate-500">AI sẽ tự động phân tích Họ từ, Giới từ đi kèm, Cụm động từ và tự động xếp vào Chủ đề phù hợp.</p>
                     </div>
-                    <button onclick="switchTab('sync')" id="aiStatusBtn" class="text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold">⚙️ Cài AI Key</button>
+                    <button onclick="switchTab('sync')" id="aiStatusBtn" class="text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold">⚙️️ Cài AI Key</button>
                 </div>
 
                 <div class="space-y-2">
@@ -250,6 +315,10 @@
                             <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">🔗 Tùy biến Giới từ theo từ gốc</span>
                         </label>
                         <label class="cursor-pointer">
+                            <input type="checkbox" id="chkPhrasal" checked class="hidden chip-check">
+                            <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">🚀 Cụm động từ (Phrasal Verbs)</span>
+                        </label>
+                        <label class="cursor-pointer">
                             <input type="checkbox" id="chkColloc" checked class="hidden chip-check">
                             <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">💎 Cụm Collocations</span>
                         </label>
@@ -264,42 +333,49 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <h2 class="font-bold text-slate-800">Danh sách chờ lưu vào kho</h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="font-bold text-slate-800">Danh sách chờ lưu vào Ngân hàng từ</h2>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="loadSampleWords()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded-lg">+ Thêm bộ mẫu Giới từ</button>
+                        <button onclick="loadSampleWords()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded-lg">+ Điền bộ mẫu đa chủ đề</button>
                         <button onclick="clearAllWords()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-3 py-1.5 rounded-lg">Xóa sạch kho</button>
                     </div>
                 </div>
-                <textarea id="bulkInput" rows="6" placeholder="work (v) [+ on] - tập trung xử lý, cải thiện điều gì&#10;work (v) [+ for] - làm việc cho một tổ chức&#10;work (v) [+ out] - tìm ra giải pháp, tính toán ra" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
-                <div class="mt-3 flex flex-wrap justify-between items-center gap-2">
+
+                <!-- Chọn Phần & Chủ đề mặc định khi dán thủ công -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Xếp vào Phần (Mặc định tự nhận diện):</label>
+                        <select id="importCategorySelect" class="w-full text-xs sm:text-sm bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
+                            <option value="auto">🤖 Tự động nhận diện (Vocab / Cụm ĐT / Collocation)</option>
+                            <option value="vocab">📘 Vocab (Từ vựng đơn & Họ từ)</option>
+                            <option value="phrasal">🚀 Cụm động từ (Phrasal Verbs)</option>
+                            <option value="colloc">💎 Cụm Collocations & Idioms</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Xếp vào Chủ đề (Topic):</label>
+                        <select id="importTopicSelect" class="w-full text-xs sm:text-sm bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700"></select>
+                    </div>
+                </div>
+
+                <textarea id="bulkInput" rows="6" placeholder="work (v) [+ on] - tập trung xử lý, cải thiện điều gì&#10;work out (phr.v) - tìm ra giải pháp, tập luyện thể thao&#10;combat environmental degradation - chống lại sự suy thoái môi trường" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
+                <div class="flex flex-wrap justify-between items-center gap-2">
                     <button onclick="addBulkWordsAndTestExpanded()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
-                        🎯 Lưu & Vào Test ngay các từ vừa mở rộng →
+                        🎯 Lưu & Vào Test ngay →
                     </button>
                     <button onclick="addBulkWords()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
-                        📥 Lưu tất cả vào kho từ
+                        📥 Lưu vào Ngân hàng từ
                     </button>
                 </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div class="flex items-center space-x-2">
-                        <h3 class="font-bold text-slate-800">Tổng kho từ (<span id="wordCount">0</span>)</h3>
-                        <button onclick="startTestWithMode('mc-prep')" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold px-3 py-1.5 rounded-lg">🔗 Test Giới từ ngay</button>
-                    </div>
-                    <input type="text" id="searchInput" oninput="renderWordList()" placeholder="Tìm kiếm từ hoặc giới từ..." class="w-full sm:w-64 px-3 py-1.5 text-sm border border-slate-300 rounded-xl outline-none">
-                </div>
-                <div id="wordListContainer" class="divide-y divide-slate-100 max-h-96 overflow-y-auto pr-1"></div>
             </div>
         </section>
 
-        <!-- TAB 5: CLOUD KEY & GEMINI AI KEY -->
+        <!-- TAB 6: CLOUD KEY & GEMINI AI KEY -->
         <section id="view-sync" class="space-y-6 hidden">
             <div class="bg-white rounded-2xl shadow-sm border-2 border-purple-500 p-5 space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-bold text-purple-950 text-base">🤖 Mã Gemini AI (Hỗ trợ Gemini 3.8 Flash & Interactions API)</h2>
+                    <h2 class="font-bold text-purple-950 text-base">🤖 Mã Gemini AI (Hỗ trợ Gemini 3.8 Flash & Tự phân loại Chủ đề)</h2>
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-lg hover:bg-purple-200">Lấy Key miễn phí ↗</a>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
@@ -347,11 +423,23 @@
 
     <script>
         const STORAGE_KEY = 'vocab_master_data_v2';
+        const CUSTOM_TOPICS_KEY = 'vocab_master_custom_topics';
         const CLOUD_KEY_STORAGE = 'vocab_master_cloud_key';
         const GEMINI_KEY_STORAGE = 'vocab_master_gemini_key';
         const ACCENT_STORAGE = 'vocab_master_accent';
         const CLOUD_API_BASE = 'https://jsonblob.com/api/jsonBlob';
 
+        const DEFAULT_TOPICS = [
+            '🌿 Môi trường & Tự nhiên',
+            '🎓 Giáo dục & Tri thức',
+            '💻 Công nghệ & Khoa học',
+            '🏛️ Xã hội & Chính sách',
+            '📈 Kinh tế & Công việc',
+            '🧠 Tâm lý & Học thuật (SAT)',
+            '📌 Chung / Chưa phân loại'
+        ];
+
+        let customTopics = [];
         let vocabList = [], quizQueue = [], currentOptions = [];
         let currentIndex = 0, correctCount = 0, wrongCount = 0, isAnswered = false, hintIndex = 0;
         let fcList = [], fcIndex = 0, isFlipped = false;
@@ -359,8 +447,263 @@
         let syncTimer = null;
         const expandCache = {};
 
+        // Trạng thái bộ lọc của Ngân hàng từ
+        let activeBankCategory = 'all'; // 'all', 'vocab', 'phrasal', 'colloc', 'prep'
+        let activeBankTopic = 'all';    // 'all' hoặc tên chủ đề
+
         // =========================================================================
-        // 1. HỆ THỐNG ÂM THANH 3 TẦNG BẤTTỬ TRÊN IPAD (KHÔNG BAO GIỜ MẤT TIẾNG)
+        // 1. TỰ ĐỘNG NHẬN DIỆN NHÓM TỪ (VOCAB / CỤM ĐỘNG TỪ / COLLOCATIONS)
+        // =========================================================================
+        function detectCategoryFromTerm(termStr) {
+            const s = String(termStr || '').trim();
+            if (/\(phr\.?v\)/i.test(s)) return 'phrasal';
+            if (/\(colloc\)/i.test(s)) return 'colloc';
+
+            const clean = extractCleanEnglishText(s);
+            const words = clean.split(/\s+/).filter(Boolean);
+
+            // Nếu từ 3 chữ trở lên -> Chắc chắn là Cụm Collocation / Idiom
+            if (words.length >= 3) return 'colloc';
+
+            // Nếu gồm 2 chữ và chữ thứ 2 là tiểu từ (up, out, off, down, in, on, away, back, over, through, into, after, फॉर...) -> Cụm động từ (Phrasal Verb)
+            if (words.length === 2) {
+                const particle = words[1].toLowerCase();
+                if (/^(up|out|off|down|in|on|away|back|over|through|into|after|for|with|to|from|about|around|aside|forth|apart|along|by)$/.test(particle)) {
+                    return 'phrasal';
+                }
+                return 'colloc';
+            }
+
+            // Nếu là 1 từ đơn nhưng đi kèm giới từ động từ đặc trưng kiểu "work (v) [+ out]"
+            if (/\(v\)\s*\[\+\s*(up|out|off|down|away|back|over|through)\]/i.test(s)) {
+                return 'phrasal';
+            }
+
+            return 'vocab';
+        }
+
+        function inferTopicFromText(termStr, meaningStr) {
+            const combined = (termStr + ' ' + meaningStr).toLowerCase();
+            if (/môi trường|khí thải|sinh thái|carbon|tự nhiên|ô nhiễm|bền vững|environment|climate|sustainable|habitat|degradation/.test(combined)) {
+                return '🌿 Môi trường & Tự nhiên';
+            }
+            if (/giáo dục|học thuật|kiến thức|trường|sinh viên|tư duy|nghiên cứu|education|cognitive|curriculum|comprehend|erudite|empirical/.test(combined)) {
+                return '🎓 Giáo dục & Tri thức';
+            }
+            if (/công nghệ|kỹ thuật|dữ liệu|mạng|phát minh|đổi mới|khoa học|innovation|technology|digital|mechanism|catalyst|hypothesis/.test(combined)) {
+                return '💻 Công nghệ & Khoa học';
+            }
+            if (/xã hội|luật|chính phủ|quy định|công chúng|bất bình đẳng|chính sách|đạo đức|regulation|policy|legislation|socioeconomic|consensus|authority|comply|conform/.test(combined)) {
+                return '🏛️ Xã hội & Chính sách';
+            }
+            if (/kinh tế|tài chính|công việc|doanh nghiệp|nguồn lực|thuế|tiền|phân bổ|economic|financial|allocate|enterprise|commodity|incentive|income|work/.test(combined)) {
+                return '📈 Kinh tế & Công việc';
+            }
+            if (/cảm xúc|tính cách|thái độ|tâm lý|ngây thơ|kiên cường|bốc đồng|thờ ơ|châm biếm|resilient|ambivalent|apathy|candid|capricious|credulous|diffident|dogmatic|ephemeral/.test(combined)) {
+                return '🧠 Tâm lý & Học thuật (SAT)';
+            }
+            return '📌 Chung / Chưa phân loại';
+        }
+
+        function normalizeVocabMetadata() {
+            let changed = false;
+            vocabList.forEach(item => {
+                if (!item.category) {
+                    item.category = detectCategoryFromTerm(item.term);
+                    changed = true;
+                }
+                if (!item.topic) {
+                    item.topic = inferTopicFromText(item.term, item.meaning);
+                    changed = true;
+                }
+            });
+            if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabList));
+        }
+
+        function getAllTopics() {
+            const set = new Set([...DEFAULT_TOPICS, ...customTopics]);
+            vocabList.forEach(w => { if (w.topic) set.add(w.topic); });
+            return Array.from(set);
+        }
+
+        function promptNewTopic() {
+            const name = prompt('Nhập tên Chủ đề mới (VD: 🧬 Sinh học & Y khoa, 🎨 Nghệ thuật):');
+            if (!name || !name.trim()) return;
+            const clean = name.trim();
+            if (!customTopics.includes(clean)) {
+                customTopics.push(clean);
+                localStorage.setItem(CUSTOM_TOPICS_KEY, JSON.stringify(customTopics));
+            }
+            activeBankTopic = clean;
+            populateTopicDropdowns();
+            renderBankView();
+            showToast('✅ Đã tạo chủ đề: ' + clean);
+        }
+
+        function populateTopicDropdowns() {
+            const select = document.getElementById('importTopicSelect');
+            if (!select) return;
+            const topics = getAllTopics();
+            select.innerHTML = '<option value="auto">🤖 Tự động phân tích Chủ đề</option>' +
+                topics.map(t => '<option value="' + escapeHtml(t) + '">' + escapeHtml(t) + '</option>').join('');
+        }
+
+        // =========================================================================
+        // 2. GIAO DIỆN NGÂN HÀNG TỪ (VIEW BANK)
+        // =========================================================================
+        function getFilteredBankItems() {
+            const query = (document.getElementById('bankSearchInput')?.value || '').toLowerCase();
+            return vocabList.map((item, idx) => ({ ...item, originalIndex: idx })).filter(item => {
+                const cat = item.category || detectCategoryFromTerm(item.term);
+                const top = item.topic || '📌 Chung / Chưa phân loại';
+
+                if (activeBankCategory === 'vocab' && cat !== 'vocab') return false;
+                if (activeBankCategory === 'phrasal' && cat !== 'phrasal') return false;
+                if (activeBankCategory === 'colloc' && cat !== 'colloc') return false;
+                if (activeBankCategory === 'prep' && !extractPreposition(item.term)) return false;
+
+                if (activeBankTopic !== 'all' && top !== activeBankTopic) return false;
+
+                if (query && !item.term.toLowerCase().includes(query) && !item.meaning.toLowerCase().includes(query)) {
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        function selectBankCategory(cat) {
+            activeBankCategory = cat;
+            renderBankView();
+        }
+
+        function selectBankTopic(topic) {
+            activeBankTopic = topic;
+            renderBankView();
+        }
+
+        function renderBankView() {
+            normalizeVocabMetadata();
+
+            // 1. Render các thẻ Nhóm từ (Tầng 1)
+            const catCounts = {
+                all: vocabList.length,
+                vocab: vocabList.filter(w => (w.category || detectCategoryFromTerm(w.term)) === 'vocab').length,
+                phrasal: vocabList.filter(w => (w.category || detectCategoryFromTerm(w.term)) === 'phrasal').length,
+                colloc: vocabList.filter(w => (w.category || detectCategoryFromTerm(w.term)) === 'colloc').length,
+                prep: vocabList.filter(w => extractPreposition(w.term) !== null).length
+            };
+
+            const categories = [
+                { id: 'all', icon: '🗂️', name: 'Tất cả kho', count: catCounts.all },
+                { id: 'vocab', icon: '📘', name: 'Vocab (Từ & Họ từ)', count: catCounts.vocab },
+                { id: 'phrasal', icon: '🚀', name: 'Cụm động từ', count: catCounts.phrasal },
+                { id: 'colloc', icon: '💎', name: 'Collocations', count: catCounts.colloc },
+                { id: 'prep', icon: '🔗', name: 'Cấu trúc Giới từ', count: catCounts.prep }
+            ];
+
+            const catContainer = document.getElementById('bankCategoryTabs');
+            catContainer.innerHTML = categories.map(c => {
+                const isActive = activeBankCategory === c.id;
+                return '<button onclick="selectBankCategory(\'' + c.id + '\')" class="p-3 rounded-xl border text-left transition flex flex-col justify-between ' +
+                    (isActive ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200') + '">' +
+                    '<div class="flex items-center justify-between w-full"><span class="text-base">' + c.icon + '</span>' +
+                    '<span class="text-xs font-extrabold px-2 py-0.5 rounded-full ' + (isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700') + '">' + c.count + '</span></div>' +
+                    '<div class="font-bold text-xs mt-2 truncate">' + c.name + '</div></button>';
+            }).join('');
+
+            // 2. Render các Chip Chủ đề (Tầng 2 - tính số lượng trong Nhóm đang chọn)
+            const baseForTopicCount = vocabList.filter(item => {
+                const cat = item.category || detectCategoryFromTerm(item.term);
+                if (activeBankCategory === 'vocab') return cat === 'vocab';
+                if (activeBankCategory === 'phrasal') return cat === 'phrasal';
+                if (activeBankCategory === 'colloc') return cat === 'colloc';
+                if (activeBankCategory === 'prep') return extractPreposition(item.term) !== null;
+                return true;
+            });
+
+            const topics = getAllTopics();
+            const topicContainer = document.getElementById('bankTopicChips');
+            let topicHtml = '<button onclick="selectBankTopic(\'all\')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ' +
+                (activeBankTopic === 'all' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50') + '">' +
+                'Tất cả chủ đề (' + baseForTopicCount.length + ')</button>';
+
+            topics.forEach(t => {
+                const cnt = baseForTopicCount.filter(w => (w.topic || '📌 Chung / Chưa phân loại') === t).length;
+                const isAct = activeBankTopic === t;
+                topicHtml += '<button onclick="selectBankTopic(\'' + escapeHtml(t).replace(/'/g, "\\'") + '\')" class="px-3 py-1.5 rounded-xl text-xs font-semibold border transition ' +
+                    (isAct ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50') + '">' +
+                    escapeHtml(t) + ' <span class="opacity-75 font-bold">(' + cnt + ')</span></button>';
+            });
+            topicContainer.innerHTML = topicHtml;
+
+            // 3. Render danh sách từ đã lọc
+            const filtered = getFilteredBankItems();
+            const catLabel = categories.find(c => c.id === activeBankCategory)?.name || 'Tất cả';
+            const topLabel = activeBankTopic === 'all' ? 'Mọi chủ đề' : activeBankTopic;
+            document.getElementById('bankCurrentFilterLabel').textContent = catLabel + ' • ' + topLabel + ' (' + filtered.length + ' từ)';
+            document.getElementById('bankFilteredCount').textContent = filtered.length;
+
+            const listEl = document.getElementById('bankListContainer');
+            listEl.innerHTML = '';
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-10 space-y-2"><p class="text-slate-400 text-sm">Chưa có từ nào trong mục này.</p>' +
+                    '<button onclick="switchTab(\'input\')" class="text-xs bg-indigo-50 text-indigo-700 font-bold px-3.5 py-2 rounded-xl">+ Thêm hoặc Khai triển từ vào mục này</button></div>';
+                return;
+            }
+
+            const allTopicsList = getAllTopics();
+            filtered.forEach(item => {
+                const cat = item.category || 'vocab';
+                const catBadge = cat === 'phrasal' ? '<span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">🚀 Cụm ĐT</span>' :
+                                 cat === 'colloc' ? '<span class="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-bold">💎 Collocation</span>' :
+                                 '<span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold">📘 Vocab</span>';
+
+                const row = document.createElement('div');
+                row.className = 'py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-xl';
+                row.innerHTML = '<div class="flex items-start sm:items-center space-x-2.5 min-w-0">' +
+                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:scale-95 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">🔊</button>' +
+                    '<div class="min-w-0"><div class="flex flex-wrap items-center gap-1.5">' +
+                    '<span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
+                    catBadge +
+                    '</div><p class="text-slate-600 text-xs sm:text-sm mt-0.5 break-words">' + escapeHtml(item.meaning) + '</p></div></div>' +
+                    '<div class="flex items-center space-x-2 shrink-0 self-end sm:self-center">' +
+                    '<select onchange="changeWordTopic(' + item.originalIndex + ', this.value)" class="text-[11px] bg-slate-100 text-slate-700 rounded-lg px-2 py-1 font-medium outline-none max-w-[150px] truncate">' +
+                    allTopicsList.map(t => '<option value="' + escapeHtml(t) + '" ' + (item.topic === t ? 'selected' : '') + '>' + escapeHtml(t) + '</option>').join('') +
+                    '</select>' +
+                    '<button onclick="deleteWord(' + item.originalIndex + ')" class="text-slate-400 hover:text-rose-600 p-1 text-xs">✕</button></div>';
+                listEl.appendChild(row);
+            });
+        }
+
+        function changeWordTopic(idx, newTopic) {
+            if (vocabList[idx]) {
+                vocabList[idx].topic = newTopic;
+                saveToStorage();
+                renderBankView();
+                showToast('🏷️ Đã chuyển sang: ' + newTopic);
+            }
+        }
+
+        function studyCurrentBankFilter(target) {
+            const items = getFilteredBankItems();
+            if (items.length === 0) return showToast('⚠️ Mục đang chọn chưa có từ nào!');
+            if (target === 'flashcard') {
+                document.getElementById('fcFilter').value = 'bank';
+                switchTab('flashcard');
+            } else if (target === 'prep') {
+                document.getElementById('testFilter').value = 'bank';
+                document.getElementById('testMode').value = 'mc-prep';
+                switchTab('test');
+            } else {
+                document.getElementById('testFilter').value = 'bank';
+                document.getElementById('testMode').value = 'mc-en-vi';
+                switchTab('test');
+            }
+        }
+
+        // =========================================================================
+        // 3. HỆ THỐNG ÂM THANH 3 TẦNG BẤT TỬ TRÊN IPAD
         // =========================================================================
         let preferredAccent = localStorage.getItem(ACCENT_STORAGE) || 'US';
         const audioCache = {};
@@ -383,6 +726,7 @@
             let s = String(rawTerm || '')
                 .replace(/\(.*?\)/g, ' ')
                 .replace(/\[.*?\]/g, ' ')
+                .replace(/\{.*?\}/g, ' ')
                 .replace(/~/g, ' ');
             if (s.includes('/')) s = s.split('/')[0];
             return s.replace(/\s+/g, ' ').trim();
@@ -420,11 +764,9 @@
             }
         }
 
-        // Phát âm đồng bộ trực tiếp (0ms delay) giúp Safari iPadOS KHÔNG BAO GIỜ chặn âm thanh
         function speakImmediateTTS(cleanText) {
             if (!('speechSynthesis' in window)) return;
             try {
-                // Chỉ cancel nếu thực sự đang bị kẹt tiếng đang nói
                 if (window.speechSynthesis.speaking) {
                     window.speechSynthesis.cancel();
                 }
@@ -452,7 +794,6 @@
                     utter.lang = chosen.lang;
                 }
 
-                // GỌI TRỰC TIẾP ĐỒNG BỘ (Tuyệt đối không dùng setTimeout trên iOS!)
                 window.speechSynthesis.speak(utter);
             } catch (e) {}
         }
@@ -464,7 +805,6 @@
             const lower = cleanText.toLowerCase();
             const wordsCount = cleanText.split(' ').length;
 
-            // Tầng 1: Nếu đã có sẵn link MP3 người thật hợp lệ trong Cache -> Phát MP3 ngay lập tức
             if (wordsCount === 1 && audioCache[lower]) {
                 const info = audioCache[lower];
                 const mp3Url = preferredAccent === 'US'
@@ -485,21 +825,18 @@
                 }
             }
 
-            // Tầng 2: Luôn phát ngay lập tức bằng TTS đồng bộ để iPad phát tiếng 100% trong mọi trường hợp
             speakImmediateTTS(cleanText);
 
-            // Đồng thời tải ngầm MP3 từ điển vào Cache cho lần nghe tiếp theo
             if (wordsCount === 1 && !audioCache[lower]) {
                 fetchWordDictionaryData(cleanText);
             }
         }
 
         // =========================================================================
-        // 2. BỘ KHAI TRIỂN AI CHUẨN GEMINI 3.8 FLASH & INTERACTIONS API MỚI NHẤT
+        // 4. BỘ KHAI TRIỂN AI & TỰ PHÂN LOẠI CHỦ ĐỀ (GEMINI 3.8 FLASH)
         // =========================================================================
         function extractTextFromGeminiResponse(data) {
             if (!data) return '';
-            // 1. Định dạng Interactions API mới của Google
             if (typeof data.output_text === 'string' && data.output_text.trim()) {
                 return data.output_text.trim();
             }
@@ -513,7 +850,6 @@
                 });
                 if (texts.length > 0) return texts.join('\n').trim();
             }
-            // 2. Định dạng generateContent (Bỏ qua các part suy nghĩ ngầm `thought: true` của Gemini 3.8)
             const parts = data.candidates?.[0]?.content?.parts || [];
             const validTexts = parts
                 .filter(p => typeof p.text === 'string' && !p.thought)
@@ -523,7 +859,6 @@
         }
 
         async function callGeminiModel(modelId, prompt, apiKey) {
-            // Cách A: Gọi generateContent với thinkingLevel = "low" (Chuẩn Gemini 3.8 / 3.6)
             const urlGen = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelId + ':generateContent?key=' + encodeURIComponent(apiKey);
             let res = await fetch(urlGen, {
                 method: 'POST',
@@ -538,7 +873,6 @@
             });
             let data = await res.json();
 
-            // Nếu model không nhận thinkingConfig (các model Lite), gọi lại không kèm thinkingConfig
             if (!res.ok && data.error?.message && data.error.message.includes('thinking')) {
                 res = await fetch(urlGen, {
                     method: 'POST',
@@ -556,15 +890,11 @@
                 if (txt) return { ok: true, text: txt };
             }
 
-            // Cách B: Nếu Google yêu cầu dùng Interactions API cho model này
             const urlInt = 'https://generativelanguage.googleapis.com/v1beta/interactions?key=' + encodeURIComponent(apiKey);
             const resInt = await fetch(urlInt, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: modelId,
-                    input: prompt
-                })
+                body: JSON.stringify({ model: modelId, input: prompt })
             });
             const dataInt = await resInt.json();
             if (resInt.ok) {
@@ -578,24 +908,49 @@
             };
         }
 
-        async function expandRootWord() {
-            const rawInput = document.getElementById('rootWordInput').value.trim();
-            if (!rawInput) return showToast('⚠️ Hãy nhập từ tiếng Anh cần mở rộng!');
-
+        async function runGeminiPrompt(prompt) {
             if (!geminiKey) {
                 geminiKey = (document.getElementById('geminiKeyInput').value || localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
             }
             if (!geminiKey) {
-                showToast('⚠️ Bạn chưa lưu mã Gemini AI Key ở mục 🔑 Key!');
+                showToast('⚠️ Hãy lưu mã Gemini AI Key ở mục 🔑 Key trước!');
                 switchTab('sync');
-                return;
+                return null;
             }
+
+            const modelsToTry = [
+                'gemini-3.8-flash',
+                'gemini-3.6-flash',
+                'gemini-3.7-flash',
+                'gemini-3.5-flash-lite',
+                'gemini-3.1-flash-lite',
+                'gemini-3-flash-preview'
+            ];
+
+            let firstError = '';
+            for (const modelName of modelsToTry) {
+                try {
+                    const result = await callGeminiModel(modelName, prompt, geminiKey);
+                    if (result.ok && result.text) return result.text;
+                    if (!firstError && result.error) firstError = result.error;
+                } catch (err) {
+                    if (!firstError) firstError = err.message;
+                }
+            }
+            showToast('❌ Lỗi gọi AI: ' + firstError);
+            return null;
+        }
+
+        async function expandRootWord() {
+            const rawInput = document.getElementById('rootWordInput').value.trim();
+            if (!rawInput) return showToast('⚠️ Hãy nhập từ tiếng Anh cần mở rộng!');
 
             const wantN = document.getElementById('chkNoun').checked;
             const wantV = document.getElementById('chkVerb').checked;
             const wantAdj = document.getElementById('chkAdj').checked;
             const wantAdv = document.getElementById('chkAdv').checked;
             const wantPrep = document.getElementById('chkPrep').checked;
+            const wantPhrasal = document.getElementById('chkPhrasal').checked;
             const wantColloc = document.getElementById('chkColloc').checked;
 
             const posSelected = [];
@@ -604,11 +959,7 @@
             if (wantAdj) posSelected.push('Tính từ (adj)');
             if (wantAdv) posSelected.push('Trạng từ (adv)');
 
-            if (posSelected.length === 0 && !wantColloc) {
-                return showToast('⚠️ Hãy tích chọn ít nhất 1 loại từ!');
-            }
-
-            const cacheKey = rawInput.toLowerCase() + '|' + posSelected.join(',') + '|' + wantPrep + '|' + wantColloc;
+            const cacheKey = rawInput.toLowerCase() + '|' + posSelected.join(',') + '|' + wantPrep + '|' + wantPhrasal + '|' + wantColloc;
             const NL = String.fromCharCode(10);
 
             if (expandCache[cacheKey]) {
@@ -622,41 +973,13 @@
             btn.textContent = '⚡ Đang phân tích bằng Gemini 3.8...';
 
             const prompt = 'Bạn là chuyên gia từ vựng IELTS 8.0 và SAT 1500+. Hãy khai triển từ gốc: "' + rawInput + '".' + NL +
-                '1. Liệt kê đầy đủ Họ từ (Word Family) của "' + rawInput + '" thuộc các loại từ: ' + posSelected.join(', ') + '.' + NL +
-                (wantPrep 
-                    ? '2. TÙY BIẾN GIỚI TỪ THEO TỪ GỐC: Xác định mọi giới từ đi kèm với từng từ đó (ví dụ: on, for, with, to, from, against, into, out, as, at, of, in, over, under...). Nếu 1 từ đi với các giới từ khác nhau mang nghĩa khác nhau (ví dụ: work (v) [+ on], work (v) [+ for], work (v) [+ as], work (v) [+ out]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG BIỆT cho từng giới từ! Nếu là ngoại động từ không cần giới từ thì ghi [+ N].' 
-                    : '2. Ghi rõ ký hiệu loại từ (n), (v), (adj), (adv).') + NL +
-                (wantColloc ? '3. Thêm 2-3 cụm Collocations học thuật đắt giá nhất gắn với từ này.' : '') + NL +
-                '4. Mỗi mục 1 dòng đúng định dạng: từ_tiếng_Anh (loại_từ) [+ giới_từ] - nghĩa_tiếng_Việt. Không giải thích, không đánh số, không dùng dấu *.';
+                '1. Liệt kê Họ từ (Word Family) thuộc các loại từ: ' + posSelected.join(', ') + '.' + NL +
+                (wantPrep ? '2. TÙY BIẾN GIỚI TỪ THEO TỪ GỐC: Xác định mọi giới từ đi kèm với từng từ đó. Nếu 1 từ đi với các giới từ khác nhau mang nghĩa khác nhau (ví dụ: work (v) [+ on], work (v) [+ for], work (v) [+ as]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG BIỆT! Nếu là ngoại động từ không giới từ thì ghi [+ N].' : '') + NL +
+                (wantPhrasal ? '3. Liệt kê 2-3 Cụm động từ (Phrasal Verbs) quan trọng nhất của từ này, ghi ký hiệu (phr.v), ví dụ: work out (phr.v) - tìm ra giải pháp.' : '') + NL +
+                (wantColloc ? '4. Thêm 2-3 cụm Collocations học thuật đắt giá nhất, ghi ký hiệu (colloc).' : '') + NL +
+                '5. Mỗi mục 1 dòng đúng định dạng: từ_tiếng_Anh (loại_từ) [+ giới_từ] - nghĩa_tiếng_Việt. Không giải thích, không đánh số, không dùng dấu *.';
 
-            // Danh sách các model thế hệ 3.x mới nhất (TUYỆT ĐỐI BỎ gemini-2.5-flash đã bị khóa cho tài khoản mới)
-            const modelsToTry = [
-                'gemini-3.8-flash',
-                'gemini-3.6-flash',
-                'gemini-3.7-flash',
-                'gemini-3.5-flash-lite',
-                'gemini-3.1-flash-lite',
-                'gemini-3-flash-preview',
-                'gemini-3.1-pro-preview'
-            ];
-
-            let successText = '';
-            let firstError = '';
-
-            for (const modelName of modelsToTry) {
-                try {
-                    const result = await callGeminiModel(modelName, prompt, geminiKey);
-                    if (result.ok && result.text) {
-                        successText = result.text;
-                        break;
-                    } else if (!firstError && result.error) {
-                        firstError = result.error;
-                    }
-                } catch (err) {
-                    if (!firstError) firstError = err.message;
-                }
-            }
-
+            const successText = await runGeminiPrompt(prompt);
             if (successText) {
                 const cleaned = successText.split(NL)
                     .map(l => l.replace(/^[\*\-\d\.\s]+/, '').replace(/\*\*/g, '').trim())
@@ -668,17 +991,56 @@
                 const box = document.getElementById('bulkInput');
                 box.value = (box.value ? box.value + NL : '') + finalOutput;
                 document.getElementById('rootWordInput').value = '';
-                showToast('⚡ Đã khai triển họ từ & giới từ thành công!');
-            } else {
-                showToast('❌ Lỗi gọi AI: ' + firstError);
+                showToast('⚡ Đã khai triển thành công!');
             }
 
             btn.disabled = false;
             btn.textContent = '⚡ Khai triển từ ngay';
         }
 
+        async function autoClassifyOldWordsWithAI() {
+            const unclassified = vocabList.filter(w => !w.topic || w.topic === '📌 Chung / Chưa phân loại');
+            if (unclassified.length === 0) {
+                return showToast('🎉 Tất cả từ trong kho đều đã có Chủ đề!');
+            }
+
+            const batch = unclassified.slice(0, 40);
+            const btn = document.getElementById('aiClassifyBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ AI đang chia chủ đề (' + batch.length + ' từ)...';
+
+            const topicsList = getAllTopics().filter(t => t !== '📌 Chung / Chưa phân loại');
+            const NL = String.fromCharCode(10);
+            const wordsText = batch.map((w, i) => i + '. ' + w.term + ' (' + w.meaning + ')').join(NL);
+
+            const prompt = 'Hãy phân loại từng mục từ dưới đây vào ĐÚNG 1 trong các chủ đề sau: ' + topicsList.join(' | ') + '.' + NL +
+                'Chỉ trả về mỗi dòng theo định dạng: số_thứ_tự | tên_chủ_đề. Không giải thích gì thêm.' + NL + wordsText;
+
+            const resp = await runGeminiPrompt(prompt);
+            if (resp) {
+                let updated = 0;
+                resp.split(NL).forEach(line => {
+                    const parts = line.split('|');
+                    if (parts.length >= 2) {
+                        const idx = parseInt(parts[0].trim());
+                        const top = parts[1].trim();
+                        if (!isNaN(idx) && batch[idx] && top) {
+                            batch[idx].topic = top;
+                            updated++;
+                        }
+                    }
+                });
+                saveToStorage();
+                renderBankView();
+                showToast('🪄 AI đã phân loại chủ đề cho ' + updated + ' từ!');
+            }
+
+            btn.disabled = false;
+            btn.textContent = '🪄 AI Tự chia Chủ đề cho từ cũ';
+        }
+
         // =========================================================================
-        // 3. HỆ THỐNG BÀI TEST MỞ RỘNG (TEST GIỚI TỪ & TEST LOẠI TỪ / HỌ TỪ)
+        // 5. HỆ THỐNG BÀI TEST ĐA CHẾ ĐỘ
         // =========================================================================
         function extractPreposition(termStr) {
             const m = String(termStr || '').match(/\[\+\s*([^\]]+)\]/);
@@ -689,22 +1051,16 @@
         }
 
         function extractPOS(termStr) {
-            const m = String(termStr || '').match(/\((n|v|adj|adv|n\/v|n\/adj)\)/i);
+            const m = String(termStr || '').match(/\((n|v|adj|adv|phr\.v|colloc|n\/v|n\/adj)\)/i);
             return m ? m[1].toLowerCase() : null;
         }
 
         function isExpandedWord(item) {
-            return /\((n|v|adj|adv)/i.test(item.term) || /\[\+/.test(item.term);
+            return /\((n|v|adj|adv|phr\.v|colloc)/i.test(item.term) || /\[\+/.test(item.term);
         }
 
         function startTestWithPool(poolType) {
             document.getElementById('testFilter').value = poolType;
-            switchTab('test');
-        }
-
-        function startTestWithMode(modeType) {
-            document.getElementById('testMode').value = modeType;
-            document.getElementById('testFilter').value = 'expanded';
             switchTab('test');
         }
 
@@ -738,9 +1094,10 @@
                 pool = vocabList.filter(w => (w.wrong || 0) > 0);
             } else if (filter === 'expanded') {
                 pool = vocabList.filter(w => isExpandedWord(w));
+            } else if (filter === 'bank') {
+                pool = getFilteredBankItems();
             }
 
-            // Nếu chọn chế độ Test Giới từ thì chỉ lọc các từ có chứa cấu trúc giới từ [+ ...]
             if (mode === 'mc-prep') {
                 pool = pool.filter(w => extractPreposition(w.term) !== null);
             } else if (mode === 'mc-pos') {
@@ -751,18 +1108,14 @@
                 quizCard.classList.add('hidden');
                 emptyState.classList.remove('hidden');
                 testWrongBtn.classList.add('hidden');
-                if (mode === 'mc-prep' || mode === 'mc-pos' || filter === 'expanded') {
-                    document.getElementById('emptyStateTitle').textContent = 'Chưa có từ Mở rộng (Giới từ / Loại từ) trong bộ này!';
-                    document.getElementById('emptyStateDesc').textContent = 'Hãy vào mục "➕ Kho từ", bấm "⚡ Khai triển từ ngay" (hoặc "+ Thêm bộ mẫu Giới từ") rồi lưu vào kho để thi chế độ Giới từ & Họ từ nhé.';
-                } else {
-                    document.getElementById('emptyStateTitle').textContent = 'Danh sách đang trống! 🎉';
-                    document.getElementById('emptyStateDesc').textContent = 'Hãy chuyển sang "Kho chung" hoặc thêm từ mới để làm bài Test.';
-                }
+                document.getElementById('emptyStateTitle').textContent = 'Chưa có từ phù hợp với chế độ lọc này!';
+                document.getElementById('emptyStateDesc').textContent = 'Hãy đổi bộ lọc sang "Kho chung" hoặc vào mục "➕ Thêm từ" để khai triển thêm Họ từ & Giới từ nhé.';
                 return;
             }
 
-            poolBadge.textContent = mode === 'mc-prep' ? '🔗 Đang Test: Điền Giới Từ' :
-                                    mode === 'mc-pos' ? '🏷️ Đang Test: Loại Từ & Họ Từ' :
+            poolBadge.textContent = mode === 'mc-prep' ? '🔗 Test: Điền Giới Từ' :
+                                    mode === 'mc-pos' ? '🏷️ Test: Loại Từ & Họ Từ' :
+                                    filter === 'bank' ? '🏦 Test theo Ngân hàng từ' :
                                     filter === 'wrong' ? '🔥 Bộ từ chưa thuộc' :
                                     filter === 'expanded' ? '✨ Bộ từ Mở rộng' : '🎲 20 từ ngẫu nhiên';
 
@@ -806,7 +1159,7 @@
             const quizPhonetic = document.getElementById('quizPhonetic');
             const subPrompt = document.getElementById('questionSubPrompt');
             quizPhonetic.textContent = '';
-            subPrompt.textContent = '';
+            subPrompt.textContent = currentItem.topic ? ('Chủ đề: ' + currentItem.topic) : '';
 
             const promptEl = document.getElementById('questionPrompt');
             const speakBtn = document.getElementById('speakBtn');
@@ -835,7 +1188,6 @@
                 typingContainer.classList.add('hidden');
                 buildStandardMC(currentItem, 'term');
             } else if (mode === 'mc-prep') {
-                // CHẾ ĐỘ TEST GIỚI TỪ ĐI KÈM: Ẩn giới từ [+ ...] đi để người học chọn
                 const maskedTerm = currentItem.term.replace(/\[\+\s*([^\]]+)\]/g, '[+ ___ ]');
                 promptEl.textContent = maskedTerm;
                 subPrompt.textContent = 'Nghĩa: ' + currentItem.meaning;
@@ -844,8 +1196,7 @@
                 typingContainer.classList.add('hidden');
                 buildPrepositionMC(currentItem);
             } else if (mode === 'mc-pos') {
-                // CHẾ ĐỘ TEST LOẠI TỪ TRONG HỌ TỪ: Ẩn (n)/(v)/(adj)/(adv)
-                const maskedPOS = currentItem.term.replace(/\((n|v|adj|adv|n\/v|n\/adj)\)/gi, '( ___ )');
+                const maskedPOS = currentItem.term.replace(/\((n|v|adj|adv|phr\.v|colloc|n\/v|n\/adj)\)/gi, '( ___ )');
                 promptEl.textContent = maskedPOS;
                 subPrompt.textContent = 'Nghĩa: ' + currentItem.meaning;
                 speakBtn.classList.remove('hidden');
@@ -867,8 +1218,12 @@
         function buildStandardMC(correctItem, field) {
             const mcContainer = document.getElementById('mcContainer');
             mcContainer.innerHTML = '';
-            const others = vocabList.filter(w => w.term.toLowerCase() !== correctItem.term.toLowerCase());
-            const distractors = shuffle(others).slice(0, 3);
+            // Ưu tiên lấy các từ cùng nhóm (Vocab / Phrasal Verb / Collocation) làm đáp án nhiễu để bài test chất lượng hơn
+            let sameCat = vocabList.filter(w => w.term.toLowerCase() !== correctItem.term.toLowerCase() && w.category === correctItem.category);
+            if (sameCat.length < 3) {
+                sameCat = vocabList.filter(w => w.term.toLowerCase() !== correctItem.term.toLowerCase());
+            }
+            const distractors = shuffle(sameCat).slice(0, 3);
             currentOptions = shuffle([correctItem, ...distractors]);
 
             currentOptions.forEach((opt, idx) => {
@@ -885,7 +1240,7 @@
             const mcContainer = document.getElementById('mcContainer');
             mcContainer.innerHTML = '';
             const correctPrep = extractPreposition(correctItem.term);
-            const commonPreps = ['to', 'with', 'for', 'on', 'in', 'from', 'of', 'against', 'into', 'out', 'about', 'at', 'upon', 'Ø (Không dùng giới từ / + N)'];
+            const commonPreps = ['to', 'with', 'for', 'on', 'in', 'from', 'of', 'against', 'into', 'out', 'as', 'at', 'upon', 'Ø (Không dùng giới từ / + N)'];
             const distractors = shuffle(commonPreps.filter(p => p.toLowerCase() !== correctPrep.toLowerCase())).slice(0, 3);
             const prepChoices = shuffle([correctPrep, ...distractors]);
 
@@ -998,7 +1353,6 @@
             speakCleanWord(item.term);
             saveToStorage();
             updateScoreUI();
-            renderWordList();
             renderUnlearnedList();
             document.getElementById('feedbackArea').classList.remove('hidden');
         }
@@ -1007,13 +1361,20 @@
         function speakCurrentWord() { if (quizQueue[currentIndex]) speakCleanWord(quizQueue[currentIndex].term); }
 
         // =========================================================================
-        // 4. QUẢN LÝ KHO TỪ, FLASHCARD & ĐỒNG BỘ CLOUD
+        // 6. QUẢN LÝ DỮ LIỆU, FLASHCARD & CLOUD SYNC
         // =========================================================================
         window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const rawTopics = localStorage.getItem(CUSTOM_TOPICS_KEY);
+                if (rawTopics) customTopics = JSON.parse(rawTopics);
+            } catch (e) { customTopics = []; }
+
             updateAccentButtonUI();
             loadFromStorage();
+            normalizeVocabMetadata();
+            populateTopicDropdowns();
             initFlashcards();
-            renderWordList();
+            renderBankView();
             renderUnlearnedList();
 
             cloudKey = localStorage.getItem(CLOUD_KEY_STORAGE) || '';
@@ -1125,9 +1486,11 @@
                 const remoteList = Array.isArray(data) ? data : (data.vocabList || []);
                 if (Array.isArray(remoteList) && (remoteList.length > 0 || !silent)) {
                     vocabList = remoteList;
+                    normalizeVocabMetadata();
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabList));
                     updateHeaderStats();
-                    renderWordList();
+                    populateTopicDropdowns();
+                    renderBankView();
                     renderUnlearnedList();
                     initFlashcards();
                 }
@@ -1181,15 +1544,14 @@
 
         function updateHeaderStats() {
             const wrongTotal = vocabList.filter(w => (w.wrong || 0) > 0).length;
-            const expandedTotal = vocabList.filter(w => isExpandedWord(w)).length;
-            document.getElementById('headerStats').textContent = vocabList.length + ' từ (' + expandedTotal + ' mở rộng) • ' + wrongTotal + ' chưa thuộc';
-            document.getElementById('wordCount').textContent = vocabList.length;
+            const phrTotal = vocabList.filter(w => (w.category || detectCategoryFromTerm(w.term)) === 'phrasal').length;
+            document.getElementById('headerStats').textContent = vocabList.length + ' từ (' + phrTotal + ' cụm ĐT) • ' + wrongTotal + ' chưa thuộc';
             document.getElementById('unlearnedBadge').textContent = wrongTotal;
             document.getElementById('unlearnedCountText').textContent = wrongTotal;
         }
 
         function switchTab(tab) {
-            ['flashcard', 'test', 'unlearned', 'input', 'sync'].forEach(t => {
+            ['flashcard', 'test', 'unlearned', 'bank', 'input', 'sync'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
                 document.getElementById('tab-' + t).className = "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap flex items-center space-x-1";
             });
@@ -1198,13 +1560,15 @@
             if (tab === 'flashcard') initFlashcards();
             if (tab === 'test') startNewTest();
             if (tab === 'unlearned') renderUnlearnedList();
-            if (tab === 'input') updateAIKeyStatusUI();
+            if (tab === 'bank') renderBankView();
+            if (tab === 'input') { updateAIKeyStatusUI(); populateTopicDropdowns(); }
         }
 
         function initFlashcards() {
             const filter = document.getElementById('fcFilter').value;
             if (filter === 'wrong') fcList = vocabList.filter(w => (w.wrong || 0) > 0);
             else if (filter === 'expanded') fcList = vocabList.filter(w => isExpandedWord(w));
+            else if (filter === 'bank') fcList = getFilteredBankItems();
             else fcList = [...vocabList];
             fcIndex = 0;
             renderFlashcard();
@@ -1230,13 +1594,15 @@
             isFlipped = false;
             el.classList.remove('rotate-y-180');
             const phoneticEl = document.getElementById('fcPhonetic');
+            const metaBadge = document.getElementById('fcMetaBadge');
 
             if (fcList.length === 0) {
                 document.getElementById('fcTerm').textContent = 'Chưa có thẻ nào ở mục này';
-                document.getElementById('fcMeaning').textContent = 'Hãy vào mục ➕ Kho từ để khai triển hoặc thêm từ vựng';
+                document.getElementById('fcMeaning').textContent = 'Hãy vào mục ➕ Thêm từ hoặc đổi bộ lọc ở trên';
                 document.getElementById('fcTermSub').textContent = '';
                 document.getElementById('fcCounter').textContent = '0 / 0';
                 phoneticEl.textContent = 'MẶT TRƯỚC';
+                metaBadge.textContent = '';
                 return;
             }
 
@@ -1246,6 +1612,7 @@
             document.getElementById('fcTermSub').textContent = item.term;
             document.getElementById('fcCounter').textContent = 'Thẻ ' + (fcIndex + 1) + ' / ' + fcList.length;
             phoneticEl.textContent = 'MẶT TRƯỚC';
+            metaBadge.textContent = item.topic || '';
 
             const clean = extractCleanEnglishText(item.term);
             if (clean && clean.split(' ').length === 1) {
@@ -1279,6 +1646,9 @@
             const NL = String.fromCharCode(10);
             const TAB = String.fromCharCode(9);
             const lines = rawText.split(NL);
+            const chosenCat = document.getElementById('importCategorySelect')?.value || 'auto';
+            const chosenTopic = document.getElementById('importTopicSelect')?.value || 'auto';
+
             const parsed = [];
             for (let line of lines) {
                 line = line.trim();
@@ -1291,7 +1661,11 @@
                 if (parts.length >= 2) {
                     const term = parts[0].trim();
                     const meaning = parts.slice(1).join(' - ').trim();
-                    if (term && meaning) parsed.push({ term, meaning, wrong: 0, correct: 0 });
+                    if (term && meaning) {
+                        const category = chosenCat === 'auto' ? detectCategoryFromTerm(term) : chosenCat;
+                        const topic = chosenTopic === 'auto' ? inferTopicFromText(term, meaning) : chosenTopic;
+                        parsed.push({ term, meaning, wrong: 0, correct: 0, category, topic });
+                    }
                 }
             }
             return parsed;
@@ -1310,6 +1684,8 @@
                         exists.meaning = exists.meaning + ' ; ' + item.meaning;
                         mergedCount++;
                     }
+                    exists.category = item.category || exists.category;
+                    exists.topic = item.topic || exists.topic;
                 } else {
                     vocabList.unshift(item);
                     addedCount++;
@@ -1317,34 +1693,33 @@
             });
             box.value = '';
             saveToStorage();
-            renderWordList();
+            renderBankView();
             initFlashcards();
-            showToast('✅ Đã lưu ' + addedCount + ' từ mới' + (mergedCount > 0 ? ' & gộp nghĩa ' + mergedCount + ' từ!' : '!'));
+            showToast('✅ Đã lưu ' + addedCount + ' mục mới vào Ngân hàng từ!');
         }
 
         function loadSampleWords() {
             const NL = String.fromCharCode(10);
             const sample = [
-                "work (v) [+ on] - tập trung nghiên cứu, cải thiện một dự án",
-                "work (v) [+ for] - làm việc cho một tổ chức hoặc mục tiêu",
-                "work (v) [+ as] - làm nghề gì với tư cách là",
-                "work (v) [+ out] - tìm ra giải pháp, tính toán hoặc tập luyện",
-                "workable (adj) [+ for] - khả thi, có thể áp dụng thực tế",
-                "adapt (v) [+ to] - thích nghi với hoàn cảnh mới",
+                "work out (phr.v) - tìm ra giải pháp, tính toán hoặc tập thể dục",
+                "work on (phr.v) - dành thời gian cải thiện, nghiên cứu dự án",
+                "step up (phr.v) - tăng cường, đẩy mạnh nỗ lực",
+                "account for (phr.v) - chiếm tỷ lệ, giải thích nguyên nhân",
+                "combat environmental degradation (colloc) - chống lại sự suy thoái môi trường",
+                "bridge the socioeconomic divide (colloc) - thu hẹp khoảng cách kinh tế xã hội",
+                "adapt (v) [+ to] - thích nghi với môi trường mới",
                 "adapt (v) [+ for] - cải biên để phù hợp với mục đích mới",
-                "adapt (v) [+ from] - chuyển thể từ một tác phẩm gốc",
                 "conform (v) [+ to] - tuân theo quy chuẩn xã hội",
-                "contend (v) [+ with] - phải đương đầu, vật lộn với khó khăn",
-                "contend (v) [+ for] - cạnh tranh để giành lấy vị trí"
+                "resilient (adj) [+ to] - kiên cường, có sức chống chịu trước"
             ].join(NL);
             document.getElementById('bulkInput').value = sample;
-            showToast('✨ Đã điền mẫu Họ từ & Giới từ! Hãy bấm nút Lưu bên dưới.');
+            showToast('✨ Đã điền mẫu Cụm động từ, Collocations & Giới từ! Hãy bấm Lưu bên dưới.');
         }
 
         function deleteWord(index) {
             vocabList.splice(index, 1);
             saveToStorage();
-            renderWordList();
+            renderBankView();
             renderUnlearnedList();
             initFlashcards();
         }
@@ -1353,7 +1728,7 @@
             if (vocabList[index]) {
                 vocabList[index].wrong = 0;
                 saveToStorage();
-                renderWordList();
+                renderBankView();
                 renderUnlearnedList();
                 initFlashcards();
                 showToast('🎉 Đã đánh dấu thuộc!');
@@ -1365,7 +1740,7 @@
             if (confirm('Xóa toàn bộ kho từ vựng?')) {
                 vocabList = [];
                 saveToStorage();
-                renderWordList();
+                renderBankView();
                 renderUnlearnedList();
                 initFlashcards();
                 showToast('🗑️ Đã xóa kho từ');
@@ -1374,32 +1749,6 @@
 
         function speakByIndex(idx) {
             if (vocabList[idx]) speakCleanWord(vocabList[idx].term);
-        }
-
-        function renderWordList() {
-            const container = document.getElementById('wordListContainer');
-            const query = (document.getElementById('searchInput').value || '').toLowerCase();
-            container.innerHTML = '';
-            const filtered = vocabList.map((item, idx) => ({ ...item, originalIndex: idx }))
-                .filter(item => item.term.toLowerCase().includes(query) || item.meaning.toLowerCase().includes(query));
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">Chưa có từ vựng nào.</p>';
-                return;
-            }
-
-            filtered.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-lg';
-                row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
-                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:scale-95 px-2.5 py-1.5 rounded-lg text-xs font-bold">🔊</button>' +
-                    '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
-                    '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
-                    '<div class="flex items-center space-x-2 shrink-0">' +
-                    (item.wrong > 0 ? '<span class="text-xs bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-semibold">Chưa thuộc (' + item.wrong + ')</span>' : '') +
-                    '<button onclick="deleteWord(' + item.originalIndex + ')" class="text-slate-400 hover:text-rose-600 p-1">✕</button></div>';
-                container.appendChild(row);
-            });
         }
 
         function renderUnlearnedList() {
@@ -1446,7 +1795,8 @@
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
                         vocabList = data;
-                        saveToStorage(); renderWordList(); renderUnlearnedList(); initFlashcards();
+                        normalizeVocabMetadata();
+                        saveToStorage(); renderBankView(); renderUnlearnedList(); initFlashcards();
                         showToast('✅ Đã khôi phục ' + data.length + ' từ!');
                     }
                 } catch (err) { showToast('❌ File không hợp lệ!'); }
