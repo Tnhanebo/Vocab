@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VocabMaster - Học & Test Từ Vựng</title>
+    <title>VocabMaster - Học Flashcard & Test Từ Vựng</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VocabMaster">
@@ -24,62 +24,114 @@
         input, textarea { user-select: text; }
         .option-btn { transition: all 0.15s ease-in-out; }
         .option-btn:active { transform: scale(0.98); }
+        
+        /* 3D Flashcard Flip Animation */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+    <!-- Header -->
     <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-30">
         <div class="max-w-4xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-2">
                 <div class="bg-white/20 px-2.5 py-1.5 rounded-xl font-extrabold text-lg">V</div>
                 <div>
                     <h1 class="font-bold text-base sm:text-lg leading-tight">VocabMaster</h1>
-                    <p class="text-[11px] text-indigo-200" id="headerStats">0 từ vựng</p>
+                    <p class="text-[11px] text-indigo-200" id="headerStats">0 từ trong kho</p>
                 </div>
             </div>
-            <nav class="flex bg-indigo-700/70 p-1 rounded-xl space-x-1 overflow-x-auto">
-                <button onclick="switchTab('input')" id="tab-input" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-indigo-700 shadow-sm whitespace-nowrap">Kho từ</button>
-                <button onclick="switchTab('test')" id="tab-test" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">Test (20 câu)</button>
-                <button onclick="switchTab('unlearned')" id="tab-unlearned" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap flex items-center space-x-1">
-                    <span>Chưa thuộc</span>
-                    <span id="unlearnedBadge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+            
+            <div class="flex items-center space-x-1.5">
+                <button onclick="forceRefreshApp()" title="Làm mới cập nhật giao diện" class="p-1.5 bg-indigo-700/80 hover:bg-indigo-700 text-indigo-100 rounded-lg text-xs font-medium flex items-center space-x-1 transition">
+                    <span>🔄</span>
+                    <span class="hidden sm:inline">Làm mới</span>
                 </button>
-                <button onclick="switchTab('sync')" id="tab-sync" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">Sao lưu</button>
-            </nav>
+                <nav class="flex bg-indigo-700/70 p-1 rounded-xl space-x-1 overflow-x-auto">
+                    <button onclick="switchTab('flashcard')" id="tab-flashcard" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-indigo-700 shadow-sm whitespace-nowrap">🃏 Flashcard</button>
+                    <button onclick="switchTab('test')" id="tab-test" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">📝 Test (20 câu)</button>
+                    <button onclick="switchTab('unlearned')" id="tab-unlearned" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap flex items-center space-x-1">
+                        <span>Chưa thuộc</span>
+                        <span id="unlearnedBadge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+                    </button>
+                    <button onclick="switchTab('input')" id="tab-input" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">Kho từ</button>
+                    <button onclick="switchTab('sync')" id="tab-sync" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">Sao lưu</button>
+                </nav>
+            </div>
         </div>
     </header>
 
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6">
-        <!-- TAB 1: KHO TỪ -->
-        <section id="view-input" class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <h2 class="font-bold text-slate-800">Dán danh sách từ vựng</h2>
-                    <div class="flex space-x-2">
-                        <button onclick="loadSampleWords()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded-lg">+ Thêm từ mẫu</button>
-                        <button onclick="clearAllWords()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-3 py-1.5 rounded-lg">Xóa tất cả</button>
-                    </div>
+
+        <!-- TAB 1: FLASHCARD (CHẾ ĐỘ HỌC CHỦ ĐẠO) -->
+        <section id="view-flashcard" class="space-y-5">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="fcFilter" onchange="initFlashcards()" class="text-xs sm:text-sm bg-indigo-50 text-indigo-700 rounded-xl px-3 py-2 font-semibold">
+                        <option value="all">Tất cả kho từ</option>
+                        <option value="wrong">🔥 Chỉ ôn từ chưa thuộc</option>
+                    </select>
+                    <button onclick="shuffleFlashcards()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-medium">🔀 Xáo trộn thẻ</button>
                 </div>
-                <p class="text-xs text-slate-500 mb-3">Mỗi từ 1 dòng. Định dạng: <code class="bg-slate-100 px-1 rounded">từ - nghĩa</code> hoặc <code class="bg-slate-100 px-1 rounded">từ : nghĩa</code>.</p>
-                <textarea id="bulkInput" rows="5" placeholder="abandon - từ bỏ&#10;resilient : kiên cường&#10;procrastinate - trì hoãn&#10;inevitable - không thể tránh khỏi" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
-                <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <span class="text-xs text-slate-400">App sẽ tự động lấy ngẫu nhiên 20 từ mỗi lần vào Test.</span>
-                    <button onclick="addBulkWords()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm shadow-sm ml-auto">Lưu vào kho từ</button>
+                <div class="text-xs sm:text-sm font-semibold text-slate-500" id="fcCounter">
+                    Thẻ 1 / 10
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div class="flex items-center space-x-2">
-                        <h3 class="font-bold text-slate-800">Tổng kho từ (<span id="wordCount">0</span>)</h3>
-                        <button onclick="startTestWithPool('all')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg">Test 20 từ ngẫu nhiên →</button>
+            <!-- Flashcard 3D Container -->
+            <div class="w-full max-w-md mx-auto perspective-1000 h-80 cursor-pointer" onclick="flipCard()">
+                <div id="flashcardElement" class="relative w-full h-full transform-style-3d transition-transform duration-500 rounded-3xl shadow-md border border-slate-200">
+                    
+                    <!-- Mặt trước (Tiếng Anh) -->
+                    <div class="absolute inset-0 w-full h-full backface-hidden bg-white rounded-3xl p-8 flex flex-col justify-between items-center text-center border-b-4 border-indigo-500">
+                        <div class="w-full flex justify-between items-center text-xs text-slate-400 font-semibold">
+                            <span>MẶT TRƯỚC</span>
+                            <span class="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Chạm để lật nghĩa 👆</span>
+                        </div>
+                        <div class="space-y-4 my-auto">
+                            <h2 id="fcTerm" class="text-3xl sm:text-4xl font-extrabold text-slate-800 break-words">...</h2>
+                            <button onclick="event.stopPropagation(); speakFCText();" class="p-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-full transition" title="Phát âm">
+                                <span class="text-xl">🔊</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400">Nhớ lại nghĩa trước khi lật thẻ</p>
                     </div>
-                    <input type="text" id="searchInput" oninput="renderWordList()" placeholder="Tìm kiếm từ hoặc nghĩa..." class="w-full sm:w-64 px-3 py-1.5 text-sm border border-slate-300 rounded-xl outline-none">
+
+                    <!-- Mặt sau (Tiếng Việt) -->
+                    <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-indigo-50 rounded-3xl p-8 flex flex-col justify-between items-center text-center border-b-4 border-emerald-500">
+                        <div class="w-full flex justify-between items-center text-xs text-slate-400 font-semibold">
+                            <span>MẶT SAU</span>
+                            <span class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Nghĩa tiếng Việt</span>
+                        </div>
+                        <div class="space-y-2 my-auto">
+                            <p id="fcMeaning" class="text-2xl sm:text-3xl font-bold text-indigo-950 break-words leading-snug">...</p>
+                            <p id="fcTermSub" class="text-sm font-semibold text-indigo-600"></p>
+                        </div>
+                        <p class="text-xs text-slate-400">Đánh giá khả năng ghi nhớ bên dưới 👇</p>
+                    </div>
+
                 </div>
-                <div id="wordListContainer" class="divide-y divide-slate-100 max-h-96 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Action Buttons for Flashcard -->
+            <div class="max-w-md mx-auto grid grid-cols-2 gap-3 pt-2">
+                <button onclick="fcNextCard(false)" class="p-3.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-2xl font-bold text-sm sm:text-base border border-rose-200 transition flex items-center justify-center space-x-1.5 shadow-sm">
+                    <span>❌ Chưa thuộc</span>
+                </button>
+                <button onclick="fcNextCard(true)" class="p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm sm:text-base transition flex items-center justify-center space-x-1.5 shadow-sm">
+                    <span>✅ Đã nhớ rõ</span>
+                </button>
+            </div>
+            
+            <div class="flex justify-between items-center max-w-md mx-auto px-2 text-xs text-slate-400">
+                <button onclick="fcPrevCard()" class="hover:text-indigo-600 font-medium">← Thẻ trước</button>
+                <button onclick="fcNextCard(null)" class="hover:text-indigo-600 font-medium">Bỏ qua thẻ này →</button>
             </div>
         </section>
 
-        <!-- TAB 2: LÀM TEST -->
+        <!-- TAB 2: TEST TRẮC NGHIỆM / TỰ LUẬN -->
         <section id="view-test" class="space-y-5 hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2">
@@ -102,7 +154,7 @@
                 <div class="flex items-center space-x-2 text-xs sm:text-sm font-semibold">
                     <span class="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">Đúng: <span id="scoreCorrect">0</span></span>
                     <span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">Sai: <span id="scoreWrong">0</span></span>
-                    <button onclick="startNewTest()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">Đổi đề mới</button>
+                    <button onclick="startNewTest()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">Đổi đề</button>
                 </div>
             </div>
 
@@ -111,7 +163,7 @@
                     <div id="quizProgress" class="bg-indigo-600 h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
                 <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
-                    <span id="poolBadge" class="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">Đang test: Kho chung</span>
+                    <span id="poolBadge" class="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full">20 từ ngẫu nhiên</span>
                     <span id="questionCounter" class="uppercase tracking-wider">Câu 1 / 20</span>
                 </div>
                 <div class="my-6 inline-flex items-center justify-center space-x-2">
@@ -137,8 +189,8 @@
                 <h3 id="emptyStateTitle" class="text-xl font-bold text-slate-800">Hoàn thành lượt Test!</h3>
                 <p id="emptyStateDesc" class="text-sm text-slate-500 max-w-md mx-auto"></p>
                 <div class="pt-2 flex flex-wrap justify-center gap-3">
-                    <button onclick="startNewTest()" id="restartTestBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">Làm tiếp 20 câu mới</button>
-                    <button onclick="startTestWithPool('wrong')" id="testWrongNowBtn" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">🔥 Test ngay các từ chưa thuộc</button>
+                    <button onclick="startNewTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">Làm tiếp 20 câu mới</button>
+                    <button onclick="startTestWithPool('wrong')" id="testWrongNowBtn" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">🔥 Test các từ chưa thuộc</button>
                 </div>
             </div>
         </section>
@@ -148,19 +200,45 @@
             <div class="bg-white rounded-2xl shadow-sm border border-rose-200 p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
                     <div>
-                        <h2 class="font-bold text-rose-700 text-lg">🔥 Bộ "Những từ chưa thuộc" (<span id="unlearnedCountText">0</span>)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Các từ bạn chọn sai trong lúc Test sẽ tự động chuyển vào đây. Khi bạn làm Test riêng và trả lời đúng, điểm sai giảm về 0 thì từ sẽ tự động được xóa khỏi danh sách này.</p>
+                        <h2 class="font-bold text-rose-700 text-lg">🔥 Bộ từ chưa thuộc (<span id="unlearnedCountText">0</span>)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Các từ bạn chọn sai khi làm Test hoặc bấm "Chưa thuộc" ở Flashcard sẽ được gom vào đây.</p>
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="startTestWithPool('wrong')" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">⚡ Làm Test riêng bộ này</button>
-                        <button onclick="clearUnlearnedList()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium px-3 py-2.5 rounded-xl text-xs">Đánh dấu thuộc tất cả</button>
+                        <button onclick="startFlashcardWithPool('wrong')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-2 rounded-xl text-xs">🃏 Học Flashcard riêng</button>
+                        <button onclick="startTestWithPool('wrong')" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-2 rounded-xl text-xs">⚡ Làm Test riêng</button>
                     </div>
                 </div>
                 <div id="unlearnedListContainer" class="divide-y divide-slate-100 max-h-96 overflow-y-auto mt-4 pr-1"></div>
             </div>
         </section>
 
-        <!-- TAB 4: SAO LƯU -->
+        <!-- TAB 4: KHO TỪ -->
+        <section id="view-input" class="space-y-6 hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <h2 class="font-bold text-slate-800">Dán danh sách từ vựng</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="loadSampleWords()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded-lg">+ Thêm từ mẫu</button>
+                        <button onclick="clearAllWords()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-3 py-1.5 rounded-lg">Xóa tất cả</button>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mb-3">Mỗi từ 1 dòng. Định dạng: <code class="bg-slate-100 px-1 rounded">từ - nghĩa</code> hoặc <code class="bg-slate-100 px-1 rounded">từ : nghĩa</code>.</p>
+                <textarea id="bulkInput" rows="5" placeholder="abandon - từ bỏ&#10;resilient : kiên cường&#10;procrastinate - trì hoãn&#10;inevitable - không thể tránh khỏi" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
+                <div class="mt-3 flex justify-end">
+                    <button onclick="addBulkWords()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm shadow-sm">Lưu vào kho từ</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <h3 class="font-bold text-slate-800">Tổng kho từ (<span id="wordCount">0</span>)</h3>
+                    <input type="text" id="searchInput" oninput="renderWordList()" placeholder="Tìm kiếm từ..." class="w-full sm:w-64 px-3 py-1.5 text-sm border border-slate-300 rounded-xl outline-none">
+                </div>
+                <div id="wordListContainer" class="divide-y divide-slate-100 max-h-96 overflow-y-auto pr-1"></div>
+            </div>
+        </section>
+
+        <!-- TAB 5: SAO LƯU -->
         <section id="view-sync" class="space-y-6 hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
                 <h2 class="font-bold text-slate-800">Sao lưu & Khôi phục bằng File (.json)</h2>
@@ -190,29 +268,39 @@
         const STORAGE_KEY = 'vocab_master_data_v2';
         let vocabList = [], quizQueue = [], currentOptions = [];
         let currentIndex = 0, correctCount = 0, wrongCount = 0, isAnswered = false, hintIndex = 0;
+        
+        // Flashcard State
+        let fcList = [], fcIndex = 0, isFlipped = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             loadFromStorage();
+            initFlashcards();
             renderWordList();
             renderUnlearnedList();
+            
+            // Phím tắt bàn phím
             document.addEventListener('keydown', (e) => {
-                if (document.getElementById('view-test').classList.contains('hidden')) return;
-                if (['1', '2', '3', '4'].includes(e.key) && !isAnswered) {
-                    const btns = document.querySelectorAll('#mcContainer button');
-                    const idx = parseInt(e.key) - 1;
-                    if (btns[idx]) btns[idx].click();
-                } else if (e.key === 'Enter') {
-                    if (isAnswered) { e.preventDefault(); nextQuestion(); }
-                    else if (document.getElementById('testMode').value === 'type-vi-en') { e.preventDefault(); checkTypingAnswer(); }
+                if (!document.getElementById('view-flashcard').classList.contains('hidden')) {
+                    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+                    else if (e.key === 'ArrowRight' || e.key === '2') { fcNextCard(true); }
+                    else if (e.key === 'ArrowLeft' || e.key === '1') { fcNextCard(false); }
                 }
             });
         });
+
+        function forceRefreshApp() {
+            showToast('🔄 Đang làm mới App...');
+            setTimeout(() => {
+                const cleanUrl = window.location.href.split('?')[0];
+                window.location.href = cleanUrl + '?t=' + Date.now();
+            }, 300);
+        }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0');
-            setTimeout(() => t.classList.add('opacity-0'), 2400);
+            setTimeout(() => t.classList.add('opacity-0'), 2200);
         }
 
         function saveToStorage() {
@@ -237,174 +325,105 @@
         }
 
         function switchTab(tab) {
-            ['input', 'test', 'unlearned', 'sync'].forEach(t => {
+            ['flashcard', 'test', 'unlearned', 'input', 'sync'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
                 const btn = document.getElementById('tab-' + t);
                 btn.className = "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap flex items-center space-x-1";
             });
             document.getElementById('view-' + tab).classList.remove('hidden');
             document.getElementById('tab-' + tab).className = "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-indigo-700 shadow-sm whitespace-nowrap flex items-center space-x-1";
+            if (tab === 'flashcard') initFlashcards();
             if (tab === 'test') startNewTest();
             if (tab === 'unlearned') renderUnlearnedList();
         }
 
+        /* FLASHCARD LOGIC */
+        function initFlashcards() {
+            const filter = document.getElementById('fcFilter').value;
+            fcList = filter === 'wrong' ? vocabList.filter(w => (w.wrong || 0) > 0) : [...vocabList];
+            fcIndex = 0;
+            renderFlashcard();
+        }
+
+        function shuffleFlashcards() {
+            fcList = shuffle(fcList);
+            fcIndex = 0;
+            renderFlashcard();
+            showToast('🔀 Đã xáo trộn danh sách thẻ!');
+        }
+
+        function flipCard() {
+            if (fcList.length === 0) return;
+            isFlipped = !isFlipped;
+            const el = document.getElementById('flashcardElement');
+            if (isFlipped) el.classList.add('rotate-y-180');
+            else el.classList.remove('rotate-y-180');
+        }
+
+        function renderFlashcard() {
+            const el = document.getElementById('flashcardElement');
+            isFlipped = false;
+            el.classList.remove('rotate-y-180');
+
+            if (fcList.length === 0) {
+                document.getElementById('fcTerm').textContent = 'Chưa có thẻ nào';
+                document.getElementById('fcMeaning').textContent = 'Hãy thêm từ vào kho để bắt đầu';
+                document.getElementById('fcTermSub').textContent = '';
+                document.getElementById('fcCounter').textContent = '0 / 0';
+                return;
+            }
+
+            const item = fcList[fcIndex];
+            document.getElementById('fcTerm').textContent = item.term;
+            document.getElementById('fcMeaning').textContent = item.meaning;
+            document.getElementById('fcTermSub').textContent = item.term;
+            document.getElementById('fcCounter').textContent = 'Thẻ ' + (fcIndex + 1) + ' / ' + fcList.length;
+        }
+
+        function fcNextCard(isKnown) {
+            if (fcList.length === 0) return;
+            const item = fcList[fcIndex];
+            const master = vocabList.find(w => w.term.toLowerCase() === item.term.toLowerCase());
+
+            if (isKnown === true) {
+                if (master && master.wrong > 0) master.wrong = Math.max(0, master.wrong - 1);
+            } else if (isKnown === false) {
+                if (master) master.wrong = (master.wrong || 0) + 1;
+            }
+
+            saveToStorage();
+            renderUnlearnedList();
+
+            if (fcIndex < fcList.length - 1) {
+                fcIndex++;
+                renderFlashcard();
+            } else {
+                showToast('🎉 Đã lướt hết các thẻ!');
+                fcIndex = 0;
+                renderFlashcard();
+            }
+        }
+
+        function fcPrevCard() {
+            if (fcIndex > 0) {
+                fcIndex--;
+                renderFlashcard();
+            }
+        }
+
+        function speakFCText() {
+            if (fcList[fcIndex]) speakText(fcList[fcIndex].term);
+        }
+
+        function startFlashcardWithPool(pool) {
+            document.getElementById('fcFilter').value = pool;
+            switchTab('flashcard');
+        }
+
+        /* QUIZ ENGINE */
         function startTestWithPool(poolType) {
             document.getElementById('testFilter').value = poolType;
             switchTab('test');
-        }
-
-        function parseInputText(rawText) {
-            const NL = String.fromCharCode(10);
-            const TAB = String.fromCharCode(9);
-            const lines = rawText.split(NL);
-            const parsed = [];
-            for (let line of lines) {
-                line = line.trim();
-                if (!line) continue;
-                let parts = [];
-                if (line.includes(TAB)) parts = line.split(TAB);
-                else if (line.includes(' - ')) parts = line.split(' - ');
-                else if (line.includes(':')) parts = line.split(':');
-                else if (line.includes('-')) parts = line.split('-');
-                if (parts.length >= 2) {
-                    const term = parts[0].trim();
-                    const meaning = parts.slice(1).join(' - ').trim();
-                    if (term && meaning) parsed.push({ term, meaning, wrong: 0, correct: 0 });
-                }
-            }
-            return parsed;
-        }
-
-        function addBulkWords() {
-            const box = document.getElementById('bulkInput');
-            const items = parseInputText(box.value);
-            if (items.length === 0) return showToast('⚠️ Hãy nhập đúng cú pháp: từ - nghĩa');
-            items.forEach(item => {
-                const exists = vocabList.find(v => v.term.toLowerCase() === item.term.toLowerCase());
-                if (exists) exists.meaning = item.meaning;
-                else vocabList.unshift(item);
-            });
-            box.value = '';
-            saveToStorage();
-            renderWordList();
-            showToast('✅ Đã lưu ' + items.length + ' từ vựng!');
-        }
-
-        function loadSampleWords() {
-            const NL = String.fromCharCode(10);
-            const sample = [
-                "abandon - từ bỏ, ruồng bỏ",
-                "resilient - kiên cường, phục hồi nhanh",
-                "inevitable - không thể tránh khỏi",
-                "procrastinate - trì hoãn",
-                "ambiguous - mơ hồ, nhập nhằng",
-                "comprehensive - toàn diện, bao quát",
-                "meticulous - tỉ mỉ, kỹ càng",
-                "spontaneous - tự phát, ngẫu hứng"
-            ].join(NL);
-            document.getElementById('bulkInput').value = sample;
-            addBulkWords();
-        }
-
-        function deleteWord(index) {
-            vocabList.splice(index, 1);
-            saveToStorage();
-            renderWordList();
-            renderUnlearnedList();
-        }
-
-        function markAsLearned(index) {
-            if (vocabList[index]) {
-                vocabList[index].wrong = 0;
-                saveToStorage();
-                renderWordList();
-                renderUnlearnedList();
-                showToast('🎉 Đã chuyển sang trạng thái Đã thuộc!');
-            }
-        }
-
-        function clearUnlearnedList() {
-            vocabList.forEach(w => w.wrong = 0);
-            saveToStorage();
-            renderWordList();
-            renderUnlearnedList();
-            showToast('✅ Đã làm sạch danh sách từ chưa thuộc!');
-        }
-
-        function clearAllWords() {
-            if (vocabList.length === 0) return;
-            if (confirm('Xóa toàn bộ danh sách từ vựng?')) {
-                vocabList = [];
-                saveToStorage();
-                renderWordList();
-                renderUnlearnedList();
-                showToast('🗑️ Đã xóa toàn bộ kho từ');
-            }
-        }
-
-        function speakText(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'en-US';
-            utter.rate = 0.95;
-            window.speechSynthesis.speak(utter);
-        }
-
-        function speakByIndex(idx) {
-            if (vocabList[idx]) speakText(vocabList[idx].term);
-        }
-
-        function renderWordList() {
-            const container = document.getElementById('wordListContainer');
-            const query = (document.getElementById('searchInput').value || '').toLowerCase();
-            container.innerHTML = '';
-            const filtered = vocabList.map((item, idx) => ({ ...item, originalIndex: idx }))
-                .filter(item => item.term.toLowerCase().includes(query) || item.meaning.toLowerCase().includes(query));
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">Chưa có từ vựng nào. Hãy dán từ vào ô bên trên.</p>';
-                return;
-            }
-
-            filtered.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-lg';
-                row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
-                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-slate-400 hover:text-indigo-600 p-1">🔊</button>' +
-                    '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
-                    '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
-                    '<div class="flex items-center space-x-2 shrink-0">' +
-                    (item.wrong > 0 ? '<span class="text-xs bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-semibold">Chưa thuộc (' + item.wrong + ')</span>' : '') +
-                    '<button onclick="deleteWord(' + item.originalIndex + ')" class="text-slate-400 hover:text-rose-600 p-1">✕</button></div>';
-                container.appendChild(row);
-            });
-        }
-
-        function renderUnlearnedList() {
-            const container = document.getElementById('unlearnedListContainer');
-            container.innerHTML = '';
-            const unlearned = vocabList.map((item, idx) => ({ ...item, originalIndex: idx }))
-                .filter(item => (item.wrong || 0) > 0)
-                .sort((a, b) => b.wrong - a.wrong);
-
-            if (unlearned.length === 0) {
-                container.innerHTML = '<div class="text-center py-10 space-y-2"><p class="text-emerald-600 font-bold">🎉 Tuyệt vời! Không có từ nào trong danh sách chưa thuộc.</p><p class="text-xs text-slate-400">Khi bạn làm sai câu nào ở mục Test, từ đó sẽ tự động được gom vào đây để bạn ôn riêng.</p></div>';
-                return;
-            }
-
-            unlearned.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'py-3 flex items-center justify-between gap-2 hover:bg-rose-50/40 px-2 rounded-lg';
-                row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
-                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-rose-500 hover:text-rose-700 p-1">🔊</button>' +
-                    '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
-                    '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
-                    '<div class="flex items-center space-x-2 shrink-0">' +
-                    '<span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-semibold">Sai ' + item.wrong + ' lần</span>' +
-                    '<button onclick="markAsLearned(' + item.originalIndex + ')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-lg">Đã thuộc ✓</button></div>';
-                container.appendChild(row);
-            });
         }
 
         function shuffle(arr) {
@@ -421,17 +440,15 @@
             const limit = parseInt(document.getElementById('testLimit').value) || 20;
             const quizCard = document.getElementById('quizCard');
             const emptyState = document.getElementById('quizEmptyState');
-            const restartBtn = document.getElementById('restartTestBtn');
-            const testWrongBtn = document.getElementById('testWrongNowBtn');
             const poolBadge = document.getElementById('poolBadge');
+            const testWrongBtn = document.getElementById('testWrongNowBtn');
 
             if (vocabList.length < 4) {
                 quizCard.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                restartBtn.classList.add('hidden');
                 testWrongBtn.classList.add('hidden');
-                document.getElementById('emptyStateTitle').textContent = 'Cần ít nhất 4 từ vựng trong kho';
-                document.getElementById('emptyStateDesc').textContent = 'Hiện tại bạn mới có ' + vocabList.length + ' từ. Hãy thêm ít nhất 4 từ vào kho để bắt đầu.';
+                document.getElementById('emptyStateTitle').textContent = 'Cần ít nhất 4 từ trong kho';
+                document.getElementById('emptyStateDesc').textContent = 'Hãy thêm từ vựng để tạo đủ 4 đáp án trắc nghiệm.';
                 return;
             }
 
@@ -439,16 +456,13 @@
             if (pool.length === 0) {
                 quizCard.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                restartBtn.classList.add('hidden');
                 testWrongBtn.classList.add('hidden');
                 document.getElementById('emptyStateTitle').textContent = 'Bộ "Từ chưa thuộc" đang trống! 🎉';
-                document.getElementById('emptyStateDesc').textContent = 'Bạn đã thuộc hết các từ hoặc chưa có từ nào bị làm sai. Hãy chuyển sang "Kho chung" để test 20 từ ngẫu nhiên nhé.';
+                document.getElementById('emptyStateDesc').textContent = 'Bạn đã thuộc hết từ vựng. Hãy chuyển sang "Kho chung" để làm bài test.';
                 return;
             }
 
-            poolBadge.textContent = filter === 'wrong' ? '🔥 Đang test: Bộ từ chưa thuộc' : '🎲 Đang test: 20 từ ngẫu nhiên';
-            poolBadge.className = filter === 'wrong' ? 'bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full font-bold' : 'bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold';
-
+            poolBadge.textContent = filter === 'wrong' ? '🔥 Bộ từ chưa thuộc' : '🎲 20 từ ngẫu nhiên';
             quizQueue = shuffle(pool).slice(0, limit);
             currentIndex = 0; correctCount = 0; wrongCount = 0;
             updateScoreUI();
@@ -465,17 +479,17 @@
         function renderCurrentQuestion() {
             if (currentIndex >= quizQueue.length) {
                 document.getElementById('quizCard').classList.add('hidden');
-                document.getElementById('quizEmptyState').classList.remove('hidden');
-                document.getElementById('restartTestBtn').classList.remove('hidden');
+                const emptyState = document.getElementById('quizEmptyState');
+                emptyState.classList.remove('hidden');
                 const unlearnedTotal = vocabList.filter(w => (w.wrong || 0) > 0).length;
                 const testWrongBtn = document.getElementById('testWrongNowBtn');
                 if (unlearnedTotal > 0) testWrongBtn.classList.remove('hidden');
                 else testWrongBtn.classList.add('hidden');
 
-                document.getElementById('emptyStateTitle').textContent = 'Hoàn thành! (' + correctCount + '/' + quizQueue.length + ' câu đúng)';
+                document.getElementById('emptyStateTitle').textContent = 'Hoàn thành lượt Test! (' + correctCount + '/' + quizQueue.length + ' câu đúng)';
                 document.getElementById('emptyStateDesc').textContent = wrongCount > 0 
-                    ? 'Lượt này bạn sai ' + wrongCount + ' câu. Các từ sai đã được tự động đưa vào bộ "Những từ chưa thuộc"!' 
-                    : 'Xuất sắc! Bạn đã vượt qua lượt test này mà không sai câu nào.';
+                    ? 'Có ' + wrongCount + ' từ bị sai đã được gom vào "Từ chưa thuộc" để bạn ôn lại.' 
+                    : 'Xuất sắc! Bạn không làm sai câu nào.';
                 return;
             }
 
@@ -579,16 +593,12 @@
             const feedbackMsg = document.getElementById('feedbackMessage');
             if (isCorrect) {
                 correctCount++;
-                if (masterItem && masterItem.wrong > 0) {
-                    masterItem.wrong = Math.max(0, masterItem.wrong - 1);
-                }
+                if (masterItem && masterItem.wrong > 0) masterItem.wrong = Math.max(0, masterItem.wrong - 1);
                 feedbackMsg.className = "font-bold text-sm mb-3 text-emerald-600";
                 feedbackMsg.textContent = '✅ Chính xác! ' + item.term + ' — ' + item.meaning;
             } else {
                 wrongCount++;
-                if (masterItem) {
-                    masterItem.wrong = (masterItem.wrong || 0) + 1;
-                }
+                if (masterItem) masterItem.wrong = (masterItem.wrong || 0) + 1;
                 feedbackMsg.className = "font-bold text-sm mb-3 text-rose-600";
                 feedbackMsg.textContent = '❌ Đã thêm vào "Từ chưa thuộc"! Đáp án: ' + item.term + ' — ' + item.meaning;
             }
@@ -596,14 +606,167 @@
             saveToStorage();
             updateScoreUI();
             renderWordList();
+            renderUnlearnedList();
             document.getElementById('feedbackArea').classList.remove('hidden');
         }
 
         function nextQuestion() { currentIndex++; renderCurrentQuestion(); }
         function speakCurrentWord() { if (quizQueue[currentIndex]) speakText(quizQueue[currentIndex].term); }
 
+        /* DATA MANAGEMENT */
+        function parseInputText(rawText) {
+            const NL = String.fromCharCode(10);
+            const TAB = String.fromCharCode(9);
+            const lines = rawText.split(NL);
+            const parsed = [];
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                let parts = [];
+                if (line.includes(TAB)) parts = line.split(TAB);
+                else if (line.includes(' - ')) parts = line.split(' - ');
+                else if (line.includes(':')) parts = line.split(':');
+                else if (line.includes('-')) parts = line.split('-');
+                if (parts.length >= 2) {
+                    const term = parts[0].trim();
+                    const meaning = parts.slice(1).join(' - ').trim();
+                    if (term && meaning) parsed.push({ term, meaning, wrong: 0, correct: 0 });
+                }
+            }
+            return parsed;
+        }
+
+        function addBulkWords() {
+            const box = document.getElementById('bulkInput');
+            const items = parseInputText(box.value);
+            if (items.length === 0) return showToast('⚠️ Hãy nhập đúng cú pháp: từ - nghĩa');
+            items.forEach(item => {
+                const exists = vocabList.find(v => v.term.toLowerCase() === item.term.toLowerCase());
+                if (exists) exists.meaning = item.meaning;
+                else vocabList.unshift(item);
+            });
+            box.value = '';
+            saveToStorage();
+            renderWordList();
+            initFlashcards();
+            showToast('✅ Đã lưu ' + items.length + ' từ vựng!');
+        }
+
+        function loadSampleWords() {
+            const NL = String.fromCharCode(10);
+            const sample = [
+                "abandon - từ bỏ, ruồng bỏ",
+                "resilient - kiên cường, phục hồi nhanh",
+                "inevitable - không thể tránh khỏi",
+                "procrastinate - trì hoãn",
+                "ambiguous - mơ hồ, nhập nhằng",
+                "comprehensive - toàn diện, bao quát",
+                "meticulous - tỉ mỉ, kỹ càng",
+                "spontaneous - tự phát, ngẫu hứng"
+            ].join(NL);
+            document.getElementById('bulkInput').value = sample;
+            addBulkWords();
+        }
+
+        function deleteWord(index) {
+            vocabList.splice(index, 1);
+            saveToStorage();
+            renderWordList();
+            renderUnlearnedList();
+            initFlashcards();
+        }
+
+        function markAsLearned(index) {
+            if (vocabList[index]) {
+                vocabList[index].wrong = 0;
+                saveToStorage();
+                renderWordList();
+                renderUnlearnedList();
+                initFlashcards();
+                showToast('🎉 Đã đánh dấu thuộc!');
+            }
+        }
+
+        function clearAllWords() {
+            if (vocabList.length === 0) return;
+            if (confirm('Xóa toàn bộ kho từ vựng?')) {
+                vocabList = [];
+                saveToStorage();
+                renderWordList();
+                renderUnlearnedList();
+                initFlashcards();
+                showToast('🗑️ Đã xóa kho từ');
+            }
+        }
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'en-US';
+            utter.rate = 0.95;
+            window.speechSynthesis.speak(utter);
+        }
+
+        function speakByIndex(idx) {
+            if (vocabList[idx]) speakText(vocabList[idx].term);
+        }
+
+        function renderWordList() {
+            const container = document.getElementById('wordListContainer');
+            const query = (document.getElementById('searchInput').value || '').toLowerCase();
+            container.innerHTML = '';
+            const filtered = vocabList.map((item, idx) => ({ ...item, originalIndex: idx }))
+                .filter(item => item.term.toLowerCase().includes(query) || item.meaning.toLowerCase().includes(query));
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">Chưa có từ vựng nào.</p>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-lg';
+                row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
+                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-slate-400 hover:text-indigo-600 p-1">🔊</button>' +
+                    '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
+                    '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
+                    '<div class="flex items-center space-x-2 shrink-0">' +
+                    (item.wrong > 0 ? '<span class="text-xs bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-semibold">Chưa thuộc (' + item.wrong + ')</span>' : '') +
+                    '<button onclick="deleteWord(' + item.originalIndex + ')" class="text-slate-400 hover:text-rose-600 p-1">✕</button></div>';
+                container.appendChild(row);
+            });
+        }
+
+        function renderUnlearnedList() {
+            const container = document.getElementById('unlearnedListContainer');
+            container.innerHTML = '';
+            const unlearned = vocabList.map((item, idx) => ({ ...item, originalIndex: idx }))
+                .filter(item => (item.wrong || 0) > 0)
+                .sort((a, b) => b.wrong - a.wrong);
+
+            if (unlearned.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 space-y-2"><p class="text-emerald-600 font-bold">🎉 Không có từ nào chưa thuộc!</p></div>';
+                return;
+            }
+
+            unlearned.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'py-3 flex items-center justify-between gap-2 hover:bg-rose-50/40 px-2 rounded-lg';
+                row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
+                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-rose-500 p-1">🔊</button>' +
+                    '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
+                    '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
+                    '<div class="flex items-center space-x-2 shrink-0">' +
+                    '<span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-semibold">Sai ' + item.wrong + '</span>' +
+                    '<button onclick="markAsLearned(' + item.originalIndex + ')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2 py-1 rounded-lg">Đã thuộc ✓</button></div>';
+                container.appendChild(row);
+            });
+        }
+
+        /* BACKUP & SYNC */
         function exportJSONFile() {
-            if (vocabList.length === 0) return showToast('⚠️ Danh sách đang trống!');
+            if (vocabList.length === 0) return showToast('⚠️ Kho từ đang trống!');
             const blob = new Blob([JSON.stringify(vocabList, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -618,7 +781,11 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) { vocabList = data; saveToStorage(); renderWordList(); renderUnlearnedList(); showToast('✅ Đã khôi phục!'); }
+                    if (Array.isArray(data)) {
+                        vocabList = data;
+                        saveToStorage(); renderWordList(); renderUnlearnedList(); initFlashcards();
+                        showToast('✅ Đã khôi phục ' + data.length + ' từ!');
+                    }
                 } catch (err) { showToast('❌ File không hợp lệ!'); }
             };
             reader.readAsText(file);
@@ -644,7 +811,8 @@
                         if (!vocabList.find(v => v.term.toLowerCase() === item.term.toLowerCase())) vocabList.push(item);
                     });
                 } else vocabList = decoded;
-                saveToStorage(); renderWordList(); renderUnlearnedList(); showToast('✅ Đồng bộ thành công!');
+                saveToStorage(); renderWordList(); renderUnlearnedList(); initFlashcards();
+                showToast('✅ Đồng bộ thành công!');
             } catch (e) { showToast('❌ Mã không hợp lệ!'); }
         }
 
