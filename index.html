@@ -163,7 +163,7 @@
                 <div class="my-6 inline-flex flex-col items-center justify-center space-y-2">
                     <div class="inline-flex items-center space-x-2">
                         <h2 id="questionPrompt" class="text-2xl sm:text-3xl font-extrabold text-slate-800 break-words">...</h2>
-                        <button id="speakBtn" onclick="speakCurrentWord()" class="p-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-full" title="Nghe phát âm">🔊</button>
+                        <button id="speakBtn" onclick="speakCurrentWord()" class="p-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 active:scale-95 rounded-full" title="Nghe phát âm">🔊</button>
                     </div>
                     <span id="quizPhonetic" class="text-xs font-mono text-indigo-500"></span>
                 </div>
@@ -251,7 +251,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
-                    <input type="text" id="rootWordInput" placeholder="Gõ từ gốc (VD: adapt, contend, conform, account)..." class="flex-1 rounded-xl border border-indigo-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="rootWordInput" placeholder="Gõ từ gốc (VD: work, adapt, contend, conform)..." class="flex-1 rounded-xl border border-indigo-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
                     <button onclick="expandRootWord()" id="expandBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm transition whitespace-nowrap">
                         ⚡ Khai triển từ ngay
                     </button>
@@ -310,7 +310,7 @@
                         <button onclick="copyCloudKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl">📋 Copy Key</button>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="pullFromCloud(false)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-2 rounded-xl">⬇️ Tải về</button>
+                        <button onclick="pullFromCloud(false)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-2 rounded-xl">⬇️️ Tải về</button>
                         <button onclick="pushToCloud(false)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-2 rounded-xl">⬆️ Đẩy lên</button>
                     </div>
                 </div>
@@ -345,10 +345,13 @@
         let syncTimer = null;
         const expandCache = {};
 
-        // AUDIO ENGINE
+        // =========================================================================
+        // HỆ THỐNG ÂM THANH CHỐNG KẸT LOA TRÊN IPAD (SINGLE REUSABLE AUDIO PLAYER)
+        // =========================================================================
         let preferredAccent = localStorage.getItem(ACCENT_STORAGE) || 'US';
         const audioCache = {};
-        let currentAudioObj = null;
+        const sharedAudioPlayer = new Audio(); // Dùng đúng 1 đối tượng Audio duy nhất để iPadOS không bao giờ khóa
+        sharedAudioPlayer.preload = 'auto';
         let availableVoices = [];
 
         function loadVoices() {
@@ -409,53 +412,84 @@
             }
         }
 
-        async function speakCleanWord(rawTerm) {
+        // Phát bằng giọng Apple Native nhưng KHÔNG gọi cancel() bừa bãi gây treo hàng đợi iPadOS
+        function playFallbackTTS(cleanText) {
+            if (!('speechSynthesis' in window)) return;
+            try {
+                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                    window.speechSynthesis.cancel();
+                }
+                if (availableVoices.length === 0) loadVoices();
+
+                const utter = new SpeechSynthesisUtterance(cleanText);
+                const targetLang = preferredAccent === 'US' ? 'en-US' : 'en-GB';
+                utter.lang = targetLang;
+                utter.rate = 0.94;
+
+                const enVoices = availableVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+                let bestVoice = null;
+
+                if (preferredAccent === 'US') {
+                    bestVoice = enVoices.find(v => /Samantha|Ava|Alex|Allison|Google US English|Microsoft Aria/i.test(v.name))
+                             || enVoices.find(v => v.lang.replace('_', '-') === 'en-US');
+                } else {
+                    bestVoice = enVoices.find(v => /Daniel|Serena|Oliver|Kate|Arthur|Google UK English/i.test(v.name))
+                             || enVoices.find(v => v.lang.replace('_', '-') === 'en-GB');
+                }
+
+                if (!bestVoice && enVoices.length > 0) bestVoice = enVoices[0];
+                if (bestVoice) {
+                    utter.voice = bestVoice;
+                    utter.lang = bestVoice.lang;
+                }
+
+                // Trên iOS/iPadOS, nếu vừa cancel() thì phải đợi 50ms mới speak() để không bị nuốt âm thanh
+                setTimeout(() => {
+                    window.speechSynthesis.speak(utter);
+                }, 50);
+            } catch (e) {}
+        }
+
+        function speakCleanWord(rawTerm) {
             const cleanText = extractCleanEnglishText(rawTerm);
             if (!cleanText) return;
 
-            if (currentAudioObj) { currentAudioObj.pause(); currentAudioObj = null; }
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-
+            const lower = cleanText.toLowerCase();
             const wordsCount = cleanText.split(' ').length;
 
-            if (wordsCount === 1) {
-                const info = await fetchWordDictionaryData(cleanText);
+            // Nếu đã có sẵn link MP3 trong Cache -> Phát đồng bộ ngay lập tức trong sự kiện chạm của người dùng
+            if (wordsCount === 1 && audioCache[lower]) {
+                const info = audioCache[lower];
                 const targetUrl = preferredAccent === 'US'
                     ? (info.usAudio || info.anyAudio || info.ukAudio)
                     : (info.ukAudio || info.anyAudio || info.usAudio);
-
                 if (targetUrl) {
-                    try {
-                        currentAudioObj = new Audio(targetUrl);
-                        await currentAudioObj.play();
-                        return;
-                    } catch (err) {}
+                    sharedAudioPlayer.pause();
+                    sharedAudioPlayer.src = targetUrl;
+                    sharedAudioPlayer.currentTime = 0;
+                    sharedAudioPlayer.play().catch(() => playFallbackTTS(cleanText));
+                    return;
                 }
             }
 
-            if (!('speechSynthesis' in window)) return;
-            if (availableVoices.length === 0) loadVoices();
-
-            const utter = new SpeechSynthesisUtterance(cleanText);
-            const targetLang = preferredAccent === 'US' ? 'en-US' : 'en-GB';
-            utter.lang = targetLang;
-            utter.rate = 0.92;
-
-            const enVoices = availableVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-            let bestVoice = null;
-
-            if (preferredAccent === 'US') {
-                bestVoice = enVoices.find(v => /Samantha|Ava|Alex|Allison|Google US English|Microsoft Aria/i.test(v.name))
-                         || enVoices.find(v => v.lang.replace('_', '-') === 'en-US');
-            } else {
-                bestVoice = enVoices.find(v => /Daniel|Serena|Oliver|Kate|Arthur|Google UK English/i.test(v.name))
-                         || enVoices.find(v => v.lang.replace('_', '-') === 'en-GB');
+            // Nếu là từ đơn chưa kịp cache -> vừa phát TTS ngay để không bị iPad chặn, vừa tải MP3 cho lần bấm thứ 2
+            if (wordsCount === 1 && !audioCache[lower]) {
+                fetchWordDictionaryData(cleanText).then(info => {
+                    const targetUrl = preferredAccent === 'US'
+                        ? (info.usAudio || info.anyAudio || info.ukAudio)
+                        : (info.ukAudio || info.anyAudio || info.usAudio);
+                    if (targetUrl) {
+                        sharedAudioPlayer.src = targetUrl;
+                        sharedAudioPlayer.play().catch(() => playFallbackTTS(cleanText));
+                    } else {
+                        playFallbackTTS(cleanText);
+                    }
+                });
+                return;
             }
 
-            if (!bestVoice && enVoices.length > 0) bestVoice = enVoices[0];
-            if (bestVoice) { utter.voice = bestVoice; utter.lang = bestVoice.lang; }
-
-            window.speechSynthesis.speak(utter);
+            // Nếu là cụm nhiều từ (Collocations) -> Phát bằng giọng chuẩn Apple/Google
+            playFallbackTTS(cleanText);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -504,7 +538,9 @@
             showToast('✅ Đã lưu mã Gemini AI Key!');
         }
 
-        // BỘ KHAI TRIỂN TÙY CHỈNH GIỚI TỪ THEO TỪNG TỪ GỐC & TÁCH DÒNG THEO NGHĨA
+        // =========================================================================
+        // BỘ KHAI TRIỂN AI HỖ TRỢ GEMINI-3.8-FLASH & TỰ ĐỘNG QUÉT MODEL MỚI NHẤT
+        // =========================================================================
         async function expandRootWord() {
             const rawInput = document.getElementById('rootWordInput').value.trim();
             if (!rawInput) return showToast('⚠️ Hãy nhập từ tiếng Anh cần mở rộng!');
@@ -552,12 +588,13 @@
             const prompt = 'Bạn là chuyên gia ngôn ngữ IELTS 8.0 và SAT 1500+. Hãy khai triển (các) từ gốc: "' + rawInput + '".' + NL +
                 '1. Lấy Word Family thuộc các loại từ đã chọn: ' + posSelected.join(', ') + '.' + NL +
                 (wantPrep 
-                    ? '2. TUYỆT ĐỐI QUAN TRỌNG VỀ GIỚI TỪ: Với mỗi từ, hãy xác định TẤT CẢ các giới từ đặc trưng đi kèm với nó (bất kỳ giới từ nào như from, against, into, upon, over, between, through, about, of, for, to, with, at, on, in, under, towards...). Nếu một từ khi đi với các giới từ khác nhau sẽ mang sắc thái nghĩa hoặc tân ngữ khác nhau (ví dụ adapt [+ to] vs adapt [+ for] vs adapt [+ from], hoặc contend [+ with] vs contend [+ for]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG cho từng giới từ để phân biệt rõ nghĩa! Nếu từ đó là ngoại động từ dùng trực tiếp không cần giới từ thì ghi [+ N].' 
+                    ? '2. TUYỆT ĐỐI QUAN TRỌNG VỀ GIỚI TỪ: Với mỗi từ, hãy xác định TẤT CẢ các giới từ đặc trưng đi kèm với nó (bất kỳ giới từ nào như from, against, into, upon, over, between, through, about, of, for, to, with, at, on, in, under, towards...). Nếu một từ khi đi với các giới từ khác nhau sẽ mang sắc thái nghĩa hoặc tân ngữ khác nhau (ví dụ work [+ on] vs work [+ for] vs work [+ as] vs work [+ out], hoặc adapt [+ to] vs adapt [+ for]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG cho từng giới từ để phân biệt rõ nghĩa! Nếu từ đó là ngoại động từ dùng trực tiếp không cần giới từ thì ghi [+ N].' 
                     : '2. Ghi rõ ký hiệu loại từ (n), (v), (adj), (adv).') + NL +
                 (wantColloc ? '3. Thêm 2-3 cụm Collocations học thuật đắt giá nhất gắn với từ này.' : '') + NL +
                 '4. Chỉ xuất kết quả, mỗi mục 1 dòng đúng cú pháp: từ_tiếng_Anh (loại_từ) [+ giới_từ_cụ_thể] - nghĩa_tiếng_Việt_tương_ứng. Không đánh số thứ tự, không dùng dấu *.';
 
-            const modelsToTry = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+            // Ưu tiên hàng đầu gemini-3.8-flash theo đúng yêu cầu của Google, kèm tự động quét danh sách model nếu cần
+            let modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.0-flash', 'gemini-2.5-flash'];
             let successText = '';
             let lastErrorMsg = '';
 
@@ -568,7 +605,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: { temperature: 0.2, maxOutputTokens: 700 }
+                            generationConfig: { temperature: 0.2, maxOutputTokens: 750 }
                         })
                     });
                     const data = await res.json();
@@ -581,6 +618,35 @@
                 } catch (err) {
                     lastErrorMsg = err.message;
                 }
+            }
+
+            // Nếu các tên cố định đều đổi tên, tự động hỏi Google danh sách model khả dụng của Key này
+            if (!successText) {
+                try {
+                    const listRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(geminiKey));
+                    const listData = await listRes.json();
+                    if (Array.isArray(listData.models)) {
+                        const available = listData.models.find(m =>
+                            m.name && m.name.includes('gemini') &&
+                            Array.isArray(m.supportedGenerationMethods) &&
+                            m.supportedGenerationMethods.includes('generateContent')
+                        );
+                        if (available) {
+                            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/' + available.name + ':generateContent?key=' + encodeURIComponent(geminiKey), {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    contents: [{ parts: [{ text: prompt }] }],
+                                    generationConfig: { temperature: 0.2, maxOutputTokens: 750 }
+                                })
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                                successText = data.candidates[0].content.parts[0].text;
+                            }
+                        }
+                    }
+                } catch (e) {}
             }
 
             if (successText) {
@@ -711,7 +777,7 @@
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0');
-            setTimeout(() => t.classList.add('opacity-0'), 2800);
+            setTimeout(() => t.classList.add('opacity-0'), 3200);
         }
 
         function saveToStorage() {
@@ -907,17 +973,20 @@
             const mcContainer = document.getElementById('mcContainer');
             const typingContainer = document.getElementById('typingContainer');
 
+            // Tải sẵn file MP3 ngay khi câu hỏi hiện ra để lúc bấm trả lời phát được tức thì trên iPad
+            const clean = extractCleanEnglishText(currentItem.term);
+            if (clean && clean.split(' ').length === 1) {
+                fetchWordDictionaryData(clean).then(info => {
+                    if (info.phonetic && mode === 'mc-en-vi') quizPhonetic.textContent = info.phonetic;
+                });
+            }
+
             if (mode === 'mc-en-vi') {
                 promptEl.textContent = currentItem.term;
                 speakBtn.classList.remove('hidden');
                 mcContainer.classList.remove('hidden');
                 typingContainer.classList.add('hidden');
                 buildMultipleChoice(currentItem, 'meaning');
-                const clean = extractCleanEnglishText(currentItem.term);
-                if (clean && clean.split(' ').length === 1) {
-                    const info = await fetchWordDictionaryData(clean);
-                    if (info.phonetic) quizPhonetic.textContent = info.phonetic;
-                }
             } else if (mode === 'mc-vi-en') {
                 promptEl.textContent = currentItem.meaning;
                 speakBtn.classList.add('hidden');
@@ -1131,7 +1200,7 @@
                 const row = document.createElement('div');
                 row.className = 'py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-lg';
                 row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
-                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg text-xs font-bold">🔊</button>' +
+                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:scale-95 px-2.5 py-1.5 rounded-lg text-xs font-bold">🔊</button>' +
                     '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
                     '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
                     '<div class="flex items-center space-x-2 shrink-0">' +
@@ -1157,7 +1226,7 @@
                 const row = document.createElement('div');
                 row.className = 'py-3 flex items-center justify-between gap-2 hover:bg-rose-50/40 px-2 rounded-lg';
                 row.innerHTML = '<div class="flex items-center space-x-2 min-w-0">' +
-                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-rose-600 bg-rose-50 px-2 py-1 rounded-lg text-xs font-bold">🔊</button>' +
+                    '<button onclick="speakByIndex(' + item.originalIndex + ')" class="text-rose-600 bg-rose-50 active:scale-95 px-2.5 py-1.5 rounded-lg text-xs font-bold">🔊</button>' +
                     '<div class="truncate"><span class="font-bold text-slate-800 text-sm">' + escapeHtml(item.term) + '</span>' +
                     '<span class="text-slate-400 mx-1.5">—</span><span class="text-slate-600 text-sm">' + escapeHtml(item.meaning) + '</span></div></div>' +
                     '<div class="flex items-center space-x-2 shrink-0">' +
