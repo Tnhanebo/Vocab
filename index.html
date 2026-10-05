@@ -551,25 +551,38 @@
         // =========================================================================
         // 2. GIAO DIỆN NGÂN HÀNG TỪ (VIEW BANK)
         // =========================================================================
-        function getFilteredBankItems() {
+                function getFilteredBankItems() {
             const query = (document.getElementById('bankSearchInput')?.value || '').toLowerCase();
-            return vocabList.map((item, idx) => ({ ...item, originalIndex: idx })).filter(item => {
-                const cat = item.category || detectCategoryFromTerm(item.term);
-                const top = item.topic || '📌 Chung / Chưa phân loại';
+            return vocabList
+                .map((item, idx) => ({ ...item, originalIndex: idx }))
+                .filter(item => {
+                    const cat = item.category || detectCategoryFromTerm(item.term);
+                    const top = item.topic || '📌 Chung / Chưa phân loại';
 
-                if (activeBankCategory === 'vocab' && cat !== 'vocab') return false;
-                if (activeBankCategory === 'phrasal' && cat !== 'phrasal') return false;
-                if (activeBankCategory === 'colloc' && cat !== 'colloc') return false;
-                if (activeBankCategory === 'prep' && !extractPreposition(item.term)) return false;
+                    if (activeBankCategory === 'vocab' && cat !== 'vocab') return false;
+                    if (activeBankCategory === 'phrasal' && cat !== 'phrasal') return false;
+                    if (activeBankCategory === 'colloc' && cat !== 'colloc') return false;
+                    if (activeBankCategory === 'prep' && !extractPreposition(item.term)) return false;
 
-                if (activeBankTopic !== 'all' && top !== activeBankTopic) return false;
+                    if (activeBankTopic !== 'all' && top !== activeBankTopic) return false;
 
-                if (query && !item.term.toLowerCase().includes(query) && !item.meaning.toLowerCase().includes(query)) {
-                    return false;
-                }
-                return true;
-            });
+                    if (query && !item.term.toLowerCase().includes(query) && !item.meaning.toLowerCase().includes(query)) {
+                        return false;
+                    }
+                    return true;
+                })
+                .sort((a, b) => {
+                    // 1. So sánh theo từ gốc tiếng Anh tinh khiết (A -> Z)
+                    const cleanA = extractCleanEnglishText(a.term).toLowerCase();
+                    const cleanB = extractCleanEnglishText(b.term).toLowerCase();
+                    const cmpClean = cleanA.localeCompare(cleanB, 'en', { sensitivity: 'base' });
+                    if (cmpClean !== 0) return cmpClean;
+
+                    // 2. Nếu cùng từ gốc (VD: adapt [+ for] và adapt [+ to]), xếp tiếp theo giới từ / loại từ (A -> Z)
+                    return a.term.toLowerCase().localeCompare(b.term.toLowerCase(), 'en', { sensitivity: 'base' });
+                });
         }
+
 
         function selectBankCategory(cat) {
             activeBankCategory = cat;
