@@ -209,13 +209,13 @@
             </div>
         </section>
 
-        <!-- TAB 4: KHO TỪ & BỘ MỞ RỘNG THÔNG MINH -->
+        <!-- TAB 4: KHO TỪ & BỘ MỞ RỘNG SIÊU TỐC -->
         <section id="view-input" class="space-y-6 hidden">
             <div class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-sm border-2 border-indigo-200 p-5 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                        <h2 class="font-bold text-indigo-950 text-base">✨ Khai triển Gốc từ, Loại từ & Giới từ đi kèm</h2>
-                        <p class="text-xs text-slate-500">Nhập 1 từ tiếng Anh bất kỳ, chọn loại từ bạn muốn lấy và hệ thống sẽ tự động phân tích kèm giới từ chuẩn IELTS/SAT.</p>
+                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Gốc từ & Giới từ Siêu tốc (IELTS 8.0 / SAT 1500)</h2>
+                        <p class="text-xs text-slate-500">Nhập 1 từ hoặc nhiều từ cách nhau bằng dấu phẩy. Hệ thống sẽ tự động phân loại từ và lọc giới từ đi kèm.</p>
                     </div>
                     <button onclick="switchTab('sync')" class="text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold">⚙️ Cài AI Key</button>
                 </div>
@@ -245,15 +245,15 @@
                         </label>
                         <label class="cursor-pointer">
                             <input type="checkbox" id="chkColloc" checked class="hidden chip-check">
-                            <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">💎 Cụm Collocations IELTS/SAT</span>
+                            <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">💎 Cụm Collocations</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
-                    <input type="text" id="rootWordInput" placeholder="Gõ 1 từ gốc (VD: comply, resilient, allocate, impose)..." class="flex-1 rounded-xl border border-indigo-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="rootWordInput" placeholder="Gõ từ (VD: conform hoặc conform, mitigate, allocate)..." class="flex-1 rounded-xl border border-indigo-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
                     <button onclick="expandRootWord()" id="expandBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm transition whitespace-nowrap">
-                        ✨ Khai triển từ ngay
+                        ⚡ Khai triển từ ngay
                     </button>
                 </div>
             </div>
@@ -342,17 +342,16 @@
         let fcList = [], fcIndex = 0, isFlipped = false;
         let cloudKey = '', geminiKey = '';
         let syncTimer = null;
+        const expandCache = {};
 
-        // HỆ THỐNG ÂM THANH CHUẨN XÁC (REAL DICTIONARY MP3 + APPLE NATIVE VOICE)
-        let preferredAccent = localStorage.getItem(ACCENT_STORAGE) || 'US'; // 'US' hoặc 'UK'
-        const audioCache = {}; // Lưu cache link MP3 và phiên âm IPA
+        // AUDIO ENGINE
+        let preferredAccent = localStorage.getItem(ACCENT_STORAGE) || 'US';
+        const audioCache = {};
         let currentAudioObj = null;
         let availableVoices = [];
 
         function loadVoices() {
-            if ('speechSynthesis' in window) {
-                availableVoices = window.speechSynthesis.getVoices();
-            }
+            if ('speechSynthesis' in window) availableVoices = window.speechSynthesis.getVoices();
         }
         if ('speechSynthesis' in window) {
             loadVoices();
@@ -361,39 +360,29 @@
 
         function updateAccentButtonUI() {
             const btn = document.getElementById('accentBtn');
-            if (btn) {
-                btn.textContent = preferredAccent === 'US' ? '🇺🇸 Giọng US' : '🇬🇧 Giọng UK';
-            }
+            if (btn) btn.textContent = preferredAccent === 'US' ? '🇺🇸 Giọng US' : '🇬🇧 Giọng UK';
         }
 
         function toggleAccent() {
             preferredAccent = preferredAccent === 'US' ? 'UK' : 'US';
             localStorage.setItem(ACCENT_STORAGE, preferredAccent);
             updateAccentButtonUI();
-            showToast('🔊 Đã chuyển sang phát âm chuẩn ' + (preferredAccent === 'US' ? 'Anh - Mỹ (US)' : 'Anh - Anh (UK)'));
+            showToast('🔊 Đã đổi sang giọng ' + (preferredAccent === 'US' ? 'Anh - Mỹ (US)' : 'Anh - Anh (UK)'));
         }
 
-        // Lọc sạch ký hiệu loại từ (v), giới từ [+ with], dấu / trước khi phát âm
         function extractCleanEnglishText(rawTerm) {
-            let s = String(rawTerm || '')
-                .replace(/\(.*?\)/g, ' ')
-                .replace(/\[.*?\]/g, ' ')
-                .replace(/~/g, ' ');
-            // Nếu có dấu gạch chéo như "Wait / Check", lấy từ chính hoặc thay bằng khoảng trắng
-            if (s.includes('/')) {
-                s = s.split('/')[0];
-            }
+            let s = String(rawTerm || '').replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/~/g, ' ');
+            if (s.includes('/')) s = s.split('/')[0];
             return s.replace(/\s+/g, ' ').trim();
         }
 
-        // Tải âm thanh người thật & Phiên âm IPA từ DictionaryAPI
         async function fetchWordDictionaryData(word) {
             const lower = word.toLowerCase();
             if (audioCache[lower]) return audioCache[lower];
 
             try {
                 const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(lower));
-                if (!res.ok) throw new Error('No dict entry');
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 const entry = data[0] || {};
                 let phonetic = entry.phonetic || '';
@@ -423,18 +412,11 @@
             const cleanText = extractCleanEnglishText(rawTerm);
             if (!cleanText) return;
 
-            // Dừng âm thanh cũ nếu đang phát
-            if (currentAudioObj) {
-                currentAudioObj.pause();
-                currentAudioObj = null;
-            }
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
+            if (currentAudioObj) { currentAudioObj.pause(); currentAudioObj = null; }
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 
             const wordsCount = cleanText.split(' ').length;
 
-            // Tầng 1: Nếu là từ đơn -> Ưu tiên phát file MP3 người thật từ Từ điển Cambridge/Oxford
             if (wordsCount === 1) {
                 const info = await fetchWordDictionaryData(cleanText);
                 const targetUrl = preferredAccent === 'US'
@@ -445,14 +427,11 @@
                     try {
                         currentAudioObj = new Audio(targetUrl);
                         await currentAudioObj.play();
-                        return; // Phát MP3 người thật thành công!
-                    } catch (err) {
-                        // Nếu lỗi mạng thì tự động chuyển xuống Tầng 2
-                    }
+                        return;
+                    } catch (err) {}
                 }
             }
 
-            // Tầng 2: Dùng giọng bản xứ cao cấp của Apple (Chặn tuyệt đối giọng Tiếng Việt đọc tiếng Anh)
             if (!('speechSynthesis' in window)) return;
             if (availableVoices.length === 0) loadVoices();
 
@@ -461,25 +440,19 @@
             utter.lang = targetLang;
             utter.rate = 0.92;
 
-            // Chọn đích danh các giọng đọc tiếng Anh chuẩn nhất trên iPad/iOS/macOS/Android
             const enVoices = availableVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
             let bestVoice = null;
 
             if (preferredAccent === 'US') {
-                bestVoice = enVoices.find(v => /Samantha|Ava|Alex|Allison|Google US English|Microsoft Aria|Microsoft Guy/i.test(v.name))
+                bestVoice = enVoices.find(v => /Samantha|Ava|Alex|Allison|Google US English|Microsoft Aria/i.test(v.name))
                          || enVoices.find(v => v.lang.replace('_', '-') === 'en-US');
             } else {
                 bestVoice = enVoices.find(v => /Daniel|Serena|Oliver|Kate|Arthur|Google UK English/i.test(v.name))
                          || enVoices.find(v => v.lang.replace('_', '-') === 'en-GB');
             }
 
-            if (!bestVoice && enVoices.length > 0) {
-                bestVoice = enVoices[0];
-            }
-            if (bestVoice) {
-                utter.voice = bestVoice;
-                utter.lang = bestVoice.lang;
-            }
+            if (!bestVoice && enVoices.length > 0) bestVoice = enVoices[0];
+            if (bestVoice) { utter.voice = bestVoice; utter.lang = bestVoice.lang; }
 
             window.speechSynthesis.speak(utter);
         }
@@ -508,9 +481,10 @@
             showToast('✅ Đã lưu mã Gemini AI Key!');
         }
 
+        // TÍNH NĂNG MỞ RỘNG SIÊU TỐC (THINKING BUDGET = 0 + CACHE)
         async function expandRootWord() {
-            const word = document.getElementById('rootWordInput').value.trim();
-            if (!word) return showToast('⚠️ Hãy nhập 1 từ tiếng Anh cần mở rộng!');
+            const rawInput = document.getElementById('rootWordInput').value.trim();
+            if (!rawInput) return showToast('⚠️ Hãy nhập từ tiếng Anh cần mở rộng!');
 
             const wantN = document.getElementById('chkNoun').checked;
             const wantV = document.getElementById('chkVerb').checked;
@@ -520,50 +494,67 @@
             const wantColloc = document.getElementById('chkColloc').checked;
 
             const posSelected = [];
-            if (wantN) posSelected.push('Danh từ (n)');
-            if (wantV) posSelected.push('Động từ (v)');
-            if (wantAdj) posSelected.push('Tính từ (adj)');
-            if (wantAdv) posSelected.push('Trạng từ (adv)');
+            if (wantN) posSelected.push('n');
+            if (wantV) posSelected.push('v');
+            if (wantAdj) posSelected.push('adj');
+            if (wantAdv) posSelected.push('adv');
 
             if (posSelected.length === 0 && !wantColloc) {
                 return showToast('⚠️ Hãy tích chọn ít nhất 1 loại từ!');
             }
 
+            const cacheKey = rawInput.toLowerCase() + '|' + posSelected.join(',') + '|' + wantPrep + '|' + wantColloc;
+            const NL = String.fromCharCode(10);
+
+            if (expandCache[cacheKey]) {
+                const box = document.getElementById('bulkInput');
+                box.value = (box.value ? box.value + NL : '') + expandCache[cacheKey];
+                return showToast('⚡ Đã lấy kết quả tức thì từ bộ nhớ đệm!');
+            }
+
             const btn = document.getElementById('expandBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Đang phân tích...';
-            const NL = String.fromCharCode(10);
+            btn.textContent = '⚡ Đang xử lý siêu tốc...';
 
             if (geminiKey) {
                 try {
-                    const prompt = 'Bạn là chuyên gia từ vựng IELTS 8.0 và SAT 1500+. Hãy khai triển từ gốc "' + word + '" theo đúng các yêu cầu sau:' + NL +
-                        '1. Chỉ liệt kê các từ thuộc họ từ (Word Family) của "' + word + '" ứng với các loại từ: ' + posSelected.join(', ') + '.' + NL +
-                        (wantPrep ? '2. BẮT BUỘC ghi rõ giới từ đi kèm trong ngoặc vuông ngay sau loại từ, ví dụ: comply (v) [+ with] - tuân thủ. Nếu là ngoại động từ không đi với giới từ thì ghi rõ [+ N / không giới từ].' : '2. Ghi rõ ký hiệu loại từ (n), (v), (adj), (adv).') + NL +
-                        (wantColloc ? '3. Thêm 2-3 cụm Collocations học thuật đắt giá nhất chứa từ này kèm giới từ chuẩn.' : '') + NL +
-                        '4. Mỗi mục 1 dòng theo cú pháp: từ_tiếng_Anh (loại_từ) [+ giới_từ] - nghĩa_tiếng_Việt. Không giải thích thừa, không dùng dấu sao (*).';
+                    const prompt = 'Khai triển (các) từ gốc: "' + rawInput + '" chuẩn IELTS 8.0/SAT 1500.' + NL +
+                        '- Lấy Word Family thuộc loại từ: ' + posSelected.join(', ') + '.' + NL +
+                        (wantPrep ? '- Ghi giới từ đi kèm trong ngoặc vuông sau loại từ: VD comply (v) [+ with] - tuân thủ. Nếu ngoại động từ không giới từ thì ghi [+ N].' : '- Ghi loại từ (n)/(v)/(adj)/(adv).') + NL +
+                        (wantColloc ? '- Thêm 2 cụm Collocations học thuật đắt giá nhất cho mỗi từ gốc.' : '') + NL +
+                        '- Chỉ xuất kết quả, mỗi mục 1 dòng đúng định dạng: từ (loại_từ) [+ giới_từ] - nghĩa_tiếng_Việt_ngắn_gọn. Không đánh số, không dùng dấu *.';
 
                     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + geminiKey, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: {
+                                temperature: 0.2,
+                                maxOutputTokens: 600,
+                                thinkingConfig: { thinkingBudget: 0 } // Tắt suy nghĩ ngầm -> Tốc độ phản hồi cực nhanh
+                            }
+                        })
                     });
                     const data = await res.json();
                     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
                     if (!text) throw new Error('Empty');
 
                     const cleaned = text.split(NL).map(l => l.replace(/^[\*\-\d\.\s]+/, '').trim()).filter(l => l.includes(' - ')).join(NL);
+                    expandCache[cacheKey] = cleaned;
                     const box = document.getElementById('bulkInput');
                     box.value = (box.value ? box.value + NL : '') + cleaned;
-                    showToast('✨ Đã khai triển xong!');
+                    document.getElementById('rootWordInput').value = '';
+                    showToast('⚡ Đã khai triển xong trong chớp mắt!');
                 } catch (err) {
-                    await fallbackDictionaryExpand(word, wantN, wantV, wantAdj, wantAdv, wantPrep);
+                    await fallbackDictionaryExpand(rawInput.split(',')[0].trim(), wantN, wantV, wantAdj, wantAdv, wantPrep);
                 }
             } else {
-                await fallbackDictionaryExpand(word, wantN, wantV, wantAdj, wantAdv, wantPrep);
+                await fallbackDictionaryExpand(rawInput.split(',')[0].trim(), wantN, wantV, wantAdj, wantAdv, wantPrep);
             }
 
             btn.disabled = false;
-            btn.textContent = '✨ Khai triển từ ngay';
+            btn.textContent = '⚡ Khai triển từ ngay';
         }
 
         async function fallbackDictionaryExpand(word, wantN, wantV, wantAdj, wantAdv, wantPrep) {
@@ -592,13 +583,14 @@
             } catch (e) {}
 
             if (results.length === 0) {
-                results.push(word + ' - (Hãy cài thêm AI Key ở mục 🔑 Key để tự dịch Tiếng Việt & lấy đủ họ từ)');
+                results.push(word + ' - (Hãy dán AI Key ở mục 🔑 Key để tự dịch Tiếng Việt & lấy đủ họ từ siêu tốc)');
             }
             const box = document.getElementById('bulkInput');
             box.value = (box.value ? box.value + NL : '') + results.join(NL);
-            showToast('ℹ️ Đã lấy dữ liệu từ điển!');
+            showToast('ℹ️ Đã lấy từ điển cơ bản!');
         }
 
+        // CLOUD SYNC ENGINE
         function updateCloudBadge(text, isConnected) {
             const badge = document.getElementById('cloudStatusBadge');
             const detail = document.getElementById('syncDetailStatus');
@@ -620,7 +612,7 @@
                 const location = res.headers.get('Location') || res.headers.get('location') || '';
                 let newKey = location.split('/').pop();
                 if (!newKey && res.url) newKey = res.url.split('/').pop();
-                if (!newKey) throw new Error('No key');
+                if (!newKey) throw new Error();
 
                 cloudKey = newKey;
                 localStorage.setItem(CLOUD_KEY_STORAGE, cloudKey);
@@ -649,7 +641,7 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ updatedAt: Date.now(), vocabList: vocabList })
                 });
-                if (!res.ok) throw new Error('Failed');
+                if (!res.ok) throw new Error();
                 updateCloudBadge('☁️ Đã lưu', true);
                 if (!silent) showToast('⬆️ Đã đẩy kho từ lên Cloud!');
             } catch (e) {
@@ -664,7 +656,7 @@
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 });
-                if (!res.ok) throw new Error('Not found');
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 const remoteList = Array.isArray(data) ? data : (data.vocabList || []);
                 if (Array.isArray(remoteList) && (remoteList.length > 0 || !silent)) {
@@ -743,7 +735,7 @@
             if (tab === 'unlearned') renderUnlearnedList();
         }
 
-        /* FLASHCARD LOGIC */
+        // FLASHCARD
         function initFlashcards() {
             const filter = document.getElementById('fcFilter').value;
             fcList = filter === 'wrong' ? vocabList.filter(w => (w.wrong || 0) > 0) : [...vocabList];
@@ -788,7 +780,6 @@
             document.getElementById('fcCounter').textContent = 'Thẻ ' + (fcIndex + 1) + ' / ' + fcList.length;
             phoneticEl.textContent = 'MẶT TRƯỚC';
 
-            // Tự động tải trước phiên âm IPA và file âm thanh MP3
             const clean = extractCleanEnglishText(item.term);
             if (clean && clean.split(' ').length === 1) {
                 const info = await fetchWordDictionaryData(clean);
@@ -817,7 +808,7 @@
         function speakFCText() { if (fcList[fcIndex]) speakCleanWord(fcList[fcIndex].term); }
         function startFlashcardWithPool(pool) { document.getElementById('fcFilter').value = pool; switchTab('flashcard'); }
 
-        /* QUIZ ENGINE */
+        // QUIZ
         function startTestWithPool(poolType) { document.getElementById('testFilter').value = poolType; switchTab('test'); }
 
         function shuffle(arr) {
@@ -1065,14 +1056,11 @@
         function loadSampleWords() {
             const NL = String.fromCharCode(10);
             const sample = [
-                "comply (v) [+ with] - tuân thủ, làm theo quy định",
-                "compliance (n) [+ with] - sự tuân thủ quy tắc",
-                "detrimental (adj) [+ to] - có hại, gây tổn hại cho",
-                "allocate (v) [+ to / for] - phân bổ nguồn lực cho",
-                "mitigate (v) [+ N / không giới từ] - giảm thiểu rủi ro, làm dịu bớt",
-                "impose (v) [+ on / upon] - áp đặt thuế hoặc quy định lên",
-                "resilient (adj) [+ to] - kiên cường, có sức chống chịu trước",
-                "abstain (v) [+ from] - kiềm chế, chủ động không tham gia vào"
+                "conform (v) [+ to / with] - tuân theo quy chuẩn xã hội",
+                "conformity (n) [+ to / with] - sự tuân thủ, tâm lý đám đông",
+                "mitigate (v) [+ N] - giảm thiểu rủi ro, xoa dịu hậu quả",
+                "allocate (v) [+ to / for] - phân bổ nguồn lực",
+                "resilient (adj) [+ to] - kiên cường, có sức chống chịu trước"
             ].join(NL);
             document.getElementById('bulkInput').value = sample;
             addBulkWords();
