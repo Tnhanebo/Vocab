@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VocabMaster - IELTS 8.0 & SAT 1500+</title>
+    <title>VocabMaster v4.0 - IELTS 8.0 & SAT 1500+</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VocabMaster">
@@ -44,7 +44,8 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="font-bold text-base sm:text-lg leading-tight">VocabMaster</h1>
-                        <button onclick="toggleAccent()" id="accentBtn" class="text-[11px] bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded-full font-bold transition" title="Đổi giọng Anh-Mỹ / Anh-Anh">
+                        <span class="text-[10px] bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-extrabold">v4.0</span>
+                        <button onclick="toggleAccent()" id="accentBtn" class="text-[11px] bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded-full font-bold transition">
                             🇺🇸 Giọng US
                         </button>
                         <span id="cloudStatusBadge" onclick="switchTab('sync')" class="cursor-pointer text-[10px] bg-indigo-800/80 text-indigo-200 px-2 py-0.5 rounded-full font-medium">☁️ Key</span>
@@ -57,7 +58,7 @@
                 <button onclick="forceRefreshApp()" title="Làm mới ứng dụng" class="p-1.5 bg-indigo-700/80 hover:bg-indigo-700 text-indigo-100 rounded-lg text-xs font-medium transition">🔄</button>
                 <nav class="flex bg-indigo-700/70 p-1 rounded-xl space-x-1 overflow-x-auto">
                     <button onclick="switchTab('flashcard')" id="tab-flashcard" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-indigo-700 shadow-sm whitespace-nowrap">🃏 Flashcard</button>
-                    <button onclick="switchTab('test')" id="tab-test" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">📝 Test (20 câu)</button>
+                    <button onclick="switchTab('test')" id="tab-test" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap">📝 Test</button>
                     <button onclick="switchTab('unlearned')" id="tab-unlearned" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-indigo-100 hover:text-white whitespace-nowrap flex items-center space-x-1">
                         <span>Chưa thuộc</span>
                         <span id="unlearnedBadge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
@@ -77,6 +78,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <select id="fcFilter" onchange="initFlashcards()" class="text-xs sm:text-sm bg-indigo-50 text-indigo-700 rounded-xl px-3 py-2 font-semibold">
                         <option value="all">Tất cả kho từ</option>
+                        <option value="expanded">✨ Chỉ từ Mở rộng (Họ từ / Giới từ)</option>
                         <option value="wrong">🔥 Chỉ ôn từ chưa thuộc</option>
                     </select>
                     <button onclick="shuffleFlashcards()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-medium">🔀 Xáo trộn thẻ</button>
@@ -93,11 +95,11 @@
                         </div>
                         <div class="space-y-4 my-auto">
                             <h2 id="fcTerm" class="text-2xl sm:text-3xl font-extrabold text-slate-800 break-words">...</h2>
-                            <button onclick="event.stopPropagation(); speakFCText();" class="p-3.5 bg-indigo-50 hover:bg-indigo-100 active:scale-95 text-indigo-600 rounded-full transition shadow-sm" title="Phát âm chuẩn từ điển">
-                                <span class="text-xl">🔊 Nghe chuẩn</span>
+                            <button onclick="event.stopPropagation(); speakFCText();" class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 active:scale-95 text-indigo-600 rounded-full font-bold text-sm transition shadow-sm">
+                                🔊 Nghe phát âm
                             </button>
                         </div>
-                        <p class="text-xs text-slate-400">Âm thanh chuẩn từ điển Oxford / Cambridge</p>
+                        <p class="text-xs text-slate-400">Chú ý loại từ và giới từ đi kèm</p>
                     </div>
 
                     <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-indigo-50 rounded-3xl p-8 flex flex-col justify-between items-center text-center border-b-4 border-emerald-500">
@@ -125,23 +127,26 @@
             </div>
         </section>
 
-        <!-- TAB 2: TEST 20 CÂU -->
+        <!-- TAB 2: TEST ĐA CHẾ ĐỘ (CÓ TEST GIỚI TỪ & LOẠI TỪ MỞ RỘNG) -->
         <section id="view-test" class="space-y-5 hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2">
-                    <select id="testMode" onchange="startNewTest()" class="text-xs sm:text-sm bg-slate-100 rounded-xl px-3 py-2 font-medium text-slate-700">
-                        <option value="mc-en-vi">Trắc nghiệm: Từ ➔ Nghĩa</option>
-                        <option value="mc-vi-en">Trắc nghiệm: Nghĩa ➔ Từ</option>
-                        <option value="type-vi-en">Tự luận: Nhìn nghĩa gõ Từ</option>
+                    <select id="testMode" onchange="startNewTest()" class="text-xs sm:text-sm bg-slate-100 rounded-xl px-3 py-2 font-bold text-slate-700">
+                        <option value="mc-en-vi">1. Trắc nghiệm: Từ ➔ Nghĩa</option>
+                        <option value="mc-vi-en">2. Trắc nghiệm: Nghĩa ➔ Từ</option>
+                        <option value="mc-prep">3. 🔗 Test Điền Giới Từ ([+ prep])</option>
+                        <option value="mc-pos">4. 🏷️ Test Phân Biệt Loại Từ (n/v/adj/adv)</option>
+                        <option value="type-vi-en">5. ⌨️ Tự luận: Nhìn nghĩa gõ Từ</option>
                     </select>
                     <select id="testFilter" onchange="startNewTest()" class="text-xs sm:text-sm bg-indigo-50 text-indigo-700 rounded-xl px-3 py-2 font-semibold">
-                        <option value="all">Kho chung (Ngẫu nhiên)</option>
+                        <option value="all">🎲 Kho chung (Ngẫu nhiên)</option>
+                        <option value="expanded">✨ Bộ từ Mở rộng (Họ từ & Giới từ)</option>
                         <option value="wrong">🔥 Bộ từ chưa thuộc</option>
                     </select>
                     <select id="testLimit" onchange="startNewTest()" class="text-xs sm:text-sm bg-slate-100 rounded-xl px-3 py-2 font-medium text-slate-700">
-                        <option value="20" selected>20 từ / lượt</option>
-                        <option value="10">10 từ / lượt</option>
-                        <option value="50">50 từ / lượt</option>
+                        <option value="20" selected>20 câu / lượt</option>
+                        <option value="10">10 câu / lượt</option>
+                        <option value="50">50 câu / lượt</option>
                         <option value="9999">Tất cả</option>
                     </select>
                 </div>
@@ -160,12 +165,13 @@
                     <span id="poolBadge" class="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full">20 từ ngẫu nhiên</span>
                     <span id="questionCounter" class="uppercase tracking-wider">Câu 1 / 20</span>
                 </div>
-                <div class="my-6 inline-flex flex-col items-center justify-center space-y-2">
+                <div class="my-5 inline-flex flex-col items-center justify-center space-y-2">
                     <div class="inline-flex items-center space-x-2">
                         <h2 id="questionPrompt" class="text-2xl sm:text-3xl font-extrabold text-slate-800 break-words">...</h2>
                         <button id="speakBtn" onclick="speakCurrentWord()" class="p-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 active:scale-95 rounded-full" title="Nghe phát âm">🔊</button>
                     </div>
-                    <span id="quizPhonetic" class="text-xs font-mono text-indigo-500"></span>
+                    <p id="questionSubPrompt" class="text-sm font-semibold text-indigo-600"></p>
+                    <span id="quizPhonetic" class="text-xs font-mono text-slate-400"></span>
                 </div>
                 <div id="mcContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left mt-4"></div>
                 <div id="typingContainer" class="hidden max-w-md mx-auto mt-6 space-y-3">
@@ -186,7 +192,7 @@
                 <h3 id="emptyStateTitle" class="text-xl font-bold text-slate-800">Hoàn thành lượt Test!</h3>
                 <p id="emptyStateDesc" class="text-sm text-slate-500 max-w-md mx-auto"></p>
                 <div class="pt-2 flex flex-wrap justify-center gap-3">
-                    <button onclick="startNewTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">Làm tiếp 20 câu mới</button>
+                    <button onclick="startNewTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">Làm tiếp đề mới</button>
                     <button onclick="startTestWithPool('wrong')" id="testWrongNowBtn" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">🔥 Test các từ chưa thuộc</button>
                 </div>
             </div>
@@ -214,7 +220,7 @@
             <div class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-sm border-2 border-indigo-200 p-5 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Gốc từ & Giới từ Tùy biến (IELTS 8.0 / SAT 1500)</h2>
+                        <h2 class="font-bold text-indigo-950 text-base">⚡ Khai triển Họ từ, Loại từ & Giới từ Tùy biến (Chuẩn Gemini 3.8)</h2>
                         <p class="text-xs text-slate-500">Tự động nhận diện mọi giới từ đi kèm theo từng từ gốc và tách dòng riêng nếu khác nghĩa.</p>
                     </div>
                     <button onclick="switchTab('sync')" id="aiStatusBtn" class="text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold">⚙️ Cài AI Key</button>
@@ -236,7 +242,7 @@
                             <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">Tính từ (adj)</span>
                         </label>
                         <label class="cursor-pointer">
-                            <input type="checkbox" id="chkAdv" class="hidden chip-check">
+                            <input type="checkbox" id="chkAdv" checked class="hidden chip-check">
                             <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 transition">Trạng từ (adv)</span>
                         </label>
                         <label class="cursor-pointer">
@@ -261,20 +267,28 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
                 <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <h2 class="font-bold text-slate-800">Danh sách chờ lưu vào kho</h2>
-                    <div class="flex space-x-2">
-                        <button onclick="loadSampleWords()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded-lg">+ Thêm từ mẫu</button>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="loadSampleWords()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded-lg">+ Thêm bộ mẫu Giới từ</button>
                         <button onclick="clearAllWords()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-3 py-1.5 rounded-lg">Xóa sạch kho</button>
                     </div>
                 </div>
-                <textarea id="bulkInput" rows="6" placeholder="adapt (v) [+ to] - thích nghi với hoàn cảnh mới&#10;adapt (v) [+ for] - cải biên để phù hợp với mục đích mới&#10;adapt (v) [+ from] - chuyển thể từ tác phẩm gốc" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
-                <div class="mt-3 flex justify-end">
-                    <button onclick="addBulkWords()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-sm">📥 Lưu tất cả vào kho từ</button>
+                <textarea id="bulkInput" rows="6" placeholder="work (v) [+ on] - tập trung xử lý, cải thiện điều gì&#10;work (v) [+ for] - làm việc cho một tổ chức&#10;work (v) [+ out] - tìm ra giải pháp, tính toán ra" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"></textarea>
+                <div class="mt-3 flex flex-wrap justify-between items-center gap-2">
+                    <button onclick="addBulkWordsAndTestExpanded()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
+                        🎯 Lưu & Vào Test ngay các từ vừa mở rộng →
+                    </button>
+                    <button onclick="addBulkWords()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
+                        📥 Lưu tất cả vào kho từ
+                    </button>
                 </div>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <h3 class="font-bold text-slate-800">Tổng kho từ (<span id="wordCount">0</span>)</h3>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="font-bold text-slate-800">Tổng kho từ (<span id="wordCount">0</span>)</h3>
+                        <button onclick="startTestWithMode('mc-prep')" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold px-3 py-1.5 rounded-lg">🔗 Test Giới từ ngay</button>
+                    </div>
                     <input type="text" id="searchInput" oninput="renderWordList()" placeholder="Tìm kiếm từ hoặc giới từ..." class="w-full sm:w-64 px-3 py-1.5 text-sm border border-slate-300 rounded-xl outline-none">
                 </div>
                 <div id="wordListContainer" class="divide-y divide-slate-100 max-h-96 overflow-y-auto pr-1"></div>
@@ -285,7 +299,7 @@
         <section id="view-sync" class="space-y-6 hidden">
             <div class="bg-white rounded-2xl shadow-sm border-2 border-purple-500 p-5 space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-bold text-purple-950 text-base">🤖 Mã Gemini AI (Khai triển Loại từ, Giới từ & Nghĩa tiếng Việt)</h2>
+                    <h2 class="font-bold text-purple-950 text-base">🤖 Mã Gemini AI (Hỗ trợ Gemini 3.8 Flash & Interactions API)</h2>
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-lg hover:bg-purple-200">Lấy Key miễn phí ↗</a>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
@@ -310,7 +324,7 @@
                         <button onclick="copyCloudKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl">📋 Copy Key</button>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="pullFromCloud(false)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-2 rounded-xl">⬇️️ Tải về</button>
+                        <button onclick="pullFromCloud(false)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-2 rounded-xl">⬇️ Tải về</button>
                         <button onclick="pushToCloud(false)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-2 rounded-xl">⬆️ Đẩy lên</button>
                     </div>
                 </div>
@@ -329,7 +343,7 @@
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50"></div>
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50 max-w-md"></div>
 
     <script>
         const STORAGE_KEY = 'vocab_master_data_v2';
@@ -346,21 +360,12 @@
         const expandCache = {};
 
         // =========================================================================
-        // HỆ THỐNG ÂM THANH CHỐNG KẸT LOA TRÊN IPAD (SINGLE REUSABLE AUDIO PLAYER)
+        // 1. HỆ THỐNG ÂM THANH 3 TẦNG BẤTTỬ TRÊN IPAD (KHÔNG BAO GIỜ MẤT TIẾNG)
         // =========================================================================
         let preferredAccent = localStorage.getItem(ACCENT_STORAGE) || 'US';
         const audioCache = {};
-        const sharedAudioPlayer = new Audio(); // Dùng đúng 1 đối tượng Audio duy nhất để iPadOS không bao giờ khóa
-        sharedAudioPlayer.preload = 'auto';
-        let availableVoices = [];
-
-        function loadVoices() {
-            if ('speechSynthesis' in window) availableVoices = window.speechSynthesis.getVoices();
-        }
-        if ('speechSynthesis' in window) {
-            loadVoices();
-            window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
+        const primaryAudio = new Audio();
+        primaryAudio.preload = 'auto';
 
         function updateAccentButtonUI() {
             const btn = document.getElementById('accentBtn');
@@ -375,7 +380,10 @@
         }
 
         function extractCleanEnglishText(rawTerm) {
-            let s = String(rawTerm || '').replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/~/g, ' ');
+            let s = String(rawTerm || '')
+                .replace(/\(.*?\)/g, ' ')
+                .replace(/\[.*?\]/g, ' ')
+                .replace(/~/g, ' ');
             if (s.includes('/')) s = s.split('/')[0];
             return s.replace(/\s+/g, ' ').trim();
         }
@@ -395,7 +403,7 @@
                 if (Array.isArray(entry.phonetics)) {
                     for (const p of entry.phonetics) {
                         if (!phonetic && p.text) phonetic = p.text;
-                        if (p.audio) {
+                        if (p.audio && p.audio.startsWith('http')) {
                             anyAudio = anyAudio || p.audio;
                             if (p.audio.includes('-us.mp3') || p.audio.includes('_us')) usAudio = p.audio;
                             if (p.audio.includes('-uk.mp3') || p.audio.includes('_gb') || p.audio.includes('_uk')) ukAudio = p.audio;
@@ -412,41 +420,40 @@
             }
         }
 
-        // Phát bằng giọng Apple Native nhưng KHÔNG gọi cancel() bừa bãi gây treo hàng đợi iPadOS
-        function playFallbackTTS(cleanText) {
+        // Phát âm đồng bộ trực tiếp (0ms delay) giúp Safari iPadOS KHÔNG BAO GIỜ chặn âm thanh
+        function speakImmediateTTS(cleanText) {
             if (!('speechSynthesis' in window)) return;
             try {
-                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                // Chỉ cancel nếu thực sự đang bị kẹt tiếng đang nói
+                if (window.speechSynthesis.speaking) {
                     window.speechSynthesis.cancel();
                 }
-                if (availableVoices.length === 0) loadVoices();
+                window.speechSynthesis.resume();
 
                 const utter = new SpeechSynthesisUtterance(cleanText);
                 const targetLang = preferredAccent === 'US' ? 'en-US' : 'en-GB';
                 utter.lang = targetLang;
-                utter.rate = 0.94;
+                utter.rate = 0.92;
 
-                const enVoices = availableVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-                let bestVoice = null;
+                const voices = window.speechSynthesis.getVoices() || [];
+                const enVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+                let chosen = null;
 
                 if (preferredAccent === 'US') {
-                    bestVoice = enVoices.find(v => /Samantha|Ava|Alex|Allison|Google US English|Microsoft Aria/i.test(v.name))
-                             || enVoices.find(v => v.lang.replace('_', '-') === 'en-US');
+                    chosen = enVoices.find(v => /Samantha|Ava|Alex|Allison|Google US English/i.test(v.name))
+                          || enVoices.find(v => v.lang.replace('_', '-') === 'en-US');
                 } else {
-                    bestVoice = enVoices.find(v => /Daniel|Serena|Oliver|Kate|Arthur|Google UK English/i.test(v.name))
-                             || enVoices.find(v => v.lang.replace('_', '-') === 'en-GB');
+                    chosen = enVoices.find(v => /Daniel|Serena|Oliver|Kate|Arthur|Google UK English/i.test(v.name))
+                          || enVoices.find(v => v.lang.replace('_', '-') === 'en-GB');
+                }
+                if (!chosen && enVoices.length > 0) chosen = enVoices[0];
+                if (chosen) {
+                    utter.voice = chosen;
+                    utter.lang = chosen.lang;
                 }
 
-                if (!bestVoice && enVoices.length > 0) bestVoice = enVoices[0];
-                if (bestVoice) {
-                    utter.voice = bestVoice;
-                    utter.lang = bestVoice.lang;
-                }
-
-                // Trên iOS/iPadOS, nếu vừa cancel() thì phải đợi 50ms mới speak() để không bị nuốt âm thanh
-                setTimeout(() => {
-                    window.speechSynthesis.speak(utter);
-                }, 50);
+                // GỌI TRỰC TIẾP ĐỒNG BỘ (Tuyệt đối không dùng setTimeout trên iOS!)
+                window.speechSynthesis.speak(utter);
             } catch (e) {}
         }
 
@@ -457,90 +464,120 @@
             const lower = cleanText.toLowerCase();
             const wordsCount = cleanText.split(' ').length;
 
-            // Nếu đã có sẵn link MP3 trong Cache -> Phát đồng bộ ngay lập tức trong sự kiện chạm của người dùng
+            // Tầng 1: Nếu đã có sẵn link MP3 người thật hợp lệ trong Cache -> Phát MP3 ngay lập tức
             if (wordsCount === 1 && audioCache[lower]) {
                 const info = audioCache[lower];
-                const targetUrl = preferredAccent === 'US'
+                const mp3Url = preferredAccent === 'US'
                     ? (info.usAudio || info.anyAudio || info.ukAudio)
                     : (info.ukAudio || info.anyAudio || info.usAudio);
-                if (targetUrl) {
-                    sharedAudioPlayer.pause();
-                    sharedAudioPlayer.src = targetUrl;
-                    sharedAudioPlayer.currentTime = 0;
-                    sharedAudioPlayer.play().catch(() => playFallbackTTS(cleanText));
-                    return;
+
+                if (mp3Url) {
+                    try {
+                        primaryAudio.pause();
+                        primaryAudio.src = mp3Url;
+                        primaryAudio.currentTime = 0;
+                        const playPromise = primaryAudio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => speakImmediateTTS(cleanText));
+                        }
+                        return;
+                    } catch (e) {}
                 }
             }
 
-            // Nếu là từ đơn chưa kịp cache -> vừa phát TTS ngay để không bị iPad chặn, vừa tải MP3 cho lần bấm thứ 2
+            // Tầng 2: Luôn phát ngay lập tức bằng TTS đồng bộ để iPad phát tiếng 100% trong mọi trường hợp
+            speakImmediateTTS(cleanText);
+
+            // Đồng thời tải ngầm MP3 từ điển vào Cache cho lần nghe tiếp theo
             if (wordsCount === 1 && !audioCache[lower]) {
-                fetchWordDictionaryData(cleanText).then(info => {
-                    const targetUrl = preferredAccent === 'US'
-                        ? (info.usAudio || info.anyAudio || info.ukAudio)
-                        : (info.ukAudio || info.anyAudio || info.usAudio);
-                    if (targetUrl) {
-                        sharedAudioPlayer.src = targetUrl;
-                        sharedAudioPlayer.play().catch(() => playFallbackTTS(cleanText));
-                    } else {
-                        playFallbackTTS(cleanText);
-                    }
+                fetchWordDictionaryData(cleanText);
+            }
+        }
+
+        // =========================================================================
+        // 2. BỘ KHAI TRIỂN AI CHUẨN GEMINI 3.8 FLASH & INTERACTIONS API MỚI NHẤT
+        // =========================================================================
+        function extractTextFromGeminiResponse(data) {
+            if (!data) return '';
+            // 1. Định dạng Interactions API mới của Google
+            if (typeof data.output_text === 'string' && data.output_text.trim()) {
+                return data.output_text.trim();
+            }
+            if (Array.isArray(data.steps)) {
+                const texts = [];
+                data.steps.forEach(s => {
+                    const msgParts = s.message?.parts || s.output?.parts || s.parts || [];
+                    msgParts.forEach(p => {
+                        if (p.text && !p.thought && p.type !== 'thought') texts.push(p.text);
+                    });
                 });
-                return;
+                if (texts.length > 0) return texts.join('\n').trim();
             }
-
-            // Nếu là cụm nhiều từ (Collocations) -> Phát bằng giọng chuẩn Apple/Google
-            playFallbackTTS(cleanText);
+            // 2. Định dạng generateContent (Bỏ qua các part suy nghĩ ngầm `thought: true` của Gemini 3.8)
+            const parts = data.candidates?.[0]?.content?.parts || [];
+            const validTexts = parts
+                .filter(p => typeof p.text === 'string' && !p.thought)
+                .map(p => p.text.trim())
+                .filter(Boolean);
+            return validTexts.join('\n').trim();
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            updateAccentButtonUI();
-            loadFromStorage();
-            initFlashcards();
-            renderWordList();
-            renderUnlearnedList();
+        async function callGeminiModel(modelId, prompt, apiKey) {
+            // Cách A: Gọi generateContent với thinkingLevel = "low" (Chuẩn Gemini 3.8 / 3.6)
+            const urlGen = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelId + ':generateContent?key=' + encodeURIComponent(apiKey);
+            let res = await fetch(urlGen, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        thinkingConfig: { thinkingLevel: 'low' }
+                    }
+                })
+            });
+            let data = await res.json();
 
-            cloudKey = localStorage.getItem(CLOUD_KEY_STORAGE) || '';
-            geminiKey = (localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
-            if (geminiKey) {
-                document.getElementById('geminiKeyInput').value = geminiKey;
-                updateAIKeyStatusUI();
+            // Nếu model không nhận thinkingConfig (các model Lite), gọi lại không kèm thinkingConfig
+            if (!res.ok && data.error?.message && data.error.message.includes('thinking')) {
+                res = await fetch(urlGen, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.2 }
+                    })
+                });
+                data = await res.json();
             }
 
-            if (cloudKey) {
-                document.getElementById('cloudKeyInput').value = cloudKey;
-                updateCloudBadge('⏳ Đang đồng bộ...', true);
-                pullFromCloud(true);
+            if (res.ok) {
+                const txt = extractTextFromGeminiResponse(data);
+                if (txt) return { ok: true, text: txt };
             }
-        });
 
-        function updateAIKeyStatusUI() {
-            const btn = document.getElementById('aiStatusBtn');
-            const st = document.getElementById('geminiKeyStatus');
-            if (geminiKey) {
-                if (btn) {
-                    btn.textContent = '✅ Đã có AI Key';
-                    btn.className = 'text-[11px] bg-emerald-50 border border-emerald-300 text-emerald-700 px-2.5 py-1 rounded-lg font-bold';
-                }
-                if (st) st.textContent = '✅ Đã lưu mã AI Key trên thiết bị này.';
-            } else {
-                if (btn) {
-                    btn.textContent = '⚙️ Cài AI Key';
-                    btn.className = 'text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold';
-                }
-                if (st) st.textContent = 'Chưa lưu AI Key.';
+            // Cách B: Nếu Google yêu cầu dùng Interactions API cho model này
+            const urlInt = 'https://generativelanguage.googleapis.com/v1beta/interactions?key=' + encodeURIComponent(apiKey);
+            const resInt = await fetch(urlInt, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: modelId,
+                    input: prompt
+                })
+            });
+            const dataInt = await resInt.json();
+            if (resInt.ok) {
+                const txtInt = extractTextFromGeminiResponse(dataInt);
+                if (txtInt) return { ok: true, text: txtInt };
             }
+
+            return {
+                ok: false,
+                error: data.error?.message || dataInt.error?.message || ('HTTP ' + res.status)
+            };
         }
 
-        function saveGeminiKey() {
-            geminiKey = document.getElementById('geminiKeyInput').value.trim();
-            localStorage.setItem(GEMINI_KEY_STORAGE, geminiKey);
-            updateAIKeyStatusUI();
-            showToast('✅ Đã lưu mã Gemini AI Key!');
-        }
-
-        // =========================================================================
-        // BỘ KHAI TRIỂN AI HỖ TRỢ GEMINI-3.8-FLASH & TỰ ĐỘNG QUÉT MODEL MỚI NHẤT
-        // =========================================================================
         async function expandRootWord() {
             const rawInput = document.getElementById('rootWordInput').value.trim();
             if (!rawInput) return showToast('⚠️ Hãy nhập từ tiếng Anh cần mở rộng!');
@@ -548,7 +585,6 @@
             if (!geminiKey) {
                 geminiKey = (document.getElementById('geminiKeyInput').value || localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
             }
-
             if (!geminiKey) {
                 showToast('⚠️ Bạn chưa lưu mã Gemini AI Key ở mục 🔑 Key!');
                 switchTab('sync');
@@ -583,70 +619,42 @@
 
             const btn = document.getElementById('expandBtn');
             btn.disabled = true;
-            btn.textContent = '⚡ Đang phân tích...';
+            btn.textContent = '⚡ Đang phân tích bằng Gemini 3.8...';
 
-            const prompt = 'Bạn là chuyên gia ngôn ngữ IELTS 8.0 và SAT 1500+. Hãy khai triển (các) từ gốc: "' + rawInput + '".' + NL +
-                '1. Lấy Word Family thuộc các loại từ đã chọn: ' + posSelected.join(', ') + '.' + NL +
+            const prompt = 'Bạn là chuyên gia từ vựng IELTS 8.0 và SAT 1500+. Hãy khai triển từ gốc: "' + rawInput + '".' + NL +
+                '1. Liệt kê đầy đủ Họ từ (Word Family) của "' + rawInput + '" thuộc các loại từ: ' + posSelected.join(', ') + '.' + NL +
                 (wantPrep 
-                    ? '2. TUYỆT ĐỐI QUAN TRỌNG VỀ GIỚI TỪ: Với mỗi từ, hãy xác định TẤT CẢ các giới từ đặc trưng đi kèm với nó (bất kỳ giới từ nào như from, against, into, upon, over, between, through, about, of, for, to, with, at, on, in, under, towards...). Nếu một từ khi đi với các giới từ khác nhau sẽ mang sắc thái nghĩa hoặc tân ngữ khác nhau (ví dụ work [+ on] vs work [+ for] vs work [+ as] vs work [+ out], hoặc adapt [+ to] vs adapt [+ for]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG cho từng giới từ để phân biệt rõ nghĩa! Nếu từ đó là ngoại động từ dùng trực tiếp không cần giới từ thì ghi [+ N].' 
+                    ? '2. TÙY BIẾN GIỚI TỪ THEO TỪ GỐC: Xác định mọi giới từ đi kèm với từng từ đó (ví dụ: on, for, with, to, from, against, into, out, as, at, of, in, over, under...). Nếu 1 từ đi với các giới từ khác nhau mang nghĩa khác nhau (ví dụ: work (v) [+ on], work (v) [+ for], work (v) [+ as], work (v) [+ out]), BẮT BUỘC TÁCH THÀNH CÁC DÒNG RIÊNG BIỆT cho từng giới từ! Nếu là ngoại động từ không cần giới từ thì ghi [+ N].' 
                     : '2. Ghi rõ ký hiệu loại từ (n), (v), (adj), (adv).') + NL +
                 (wantColloc ? '3. Thêm 2-3 cụm Collocations học thuật đắt giá nhất gắn với từ này.' : '') + NL +
-                '4. Chỉ xuất kết quả, mỗi mục 1 dòng đúng cú pháp: từ_tiếng_Anh (loại_từ) [+ giới_từ_cụ_thể] - nghĩa_tiếng_Việt_tương_ứng. Không đánh số thứ tự, không dùng dấu *.';
+                '4. Mỗi mục 1 dòng đúng định dạng: từ_tiếng_Anh (loại_từ) [+ giới_từ] - nghĩa_tiếng_Việt. Không giải thích, không đánh số, không dùng dấu *.';
 
-            // Ưu tiên hàng đầu gemini-3.8-flash theo đúng yêu cầu của Google, kèm tự động quét danh sách model nếu cần
-            let modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.0-flash', 'gemini-2.5-flash'];
+            // Danh sách các model thế hệ 3.x mới nhất (TUYỆT ĐỐI BỎ gemini-2.5-flash đã bị khóa cho tài khoản mới)
+            const modelsToTry = [
+                'gemini-3.8-flash',
+                'gemini-3.6-flash',
+                'gemini-3.7-flash',
+                'gemini-3.5-flash-lite',
+                'gemini-3.1-flash-lite',
+                'gemini-3-flash-preview',
+                'gemini-3.1-pro-preview'
+            ];
+
             let successText = '';
-            let lastErrorMsg = '';
+            let firstError = '';
 
             for (const modelName of modelsToTry) {
                 try {
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + encodeURIComponent(geminiKey), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: { temperature: 0.2, maxOutputTokens: 750 }
-                        })
-                    });
-                    const data = await res.json();
-                    if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        successText = data.candidates[0].content.parts[0].text;
+                    const result = await callGeminiModel(modelName, prompt, geminiKey);
+                    if (result.ok && result.text) {
+                        successText = result.text;
                         break;
-                    } else {
-                        lastErrorMsg = data.error?.message || ('HTTP ' + res.status);
+                    } else if (!firstError && result.error) {
+                        firstError = result.error;
                     }
                 } catch (err) {
-                    lastErrorMsg = err.message;
+                    if (!firstError) firstError = err.message;
                 }
-            }
-
-            // Nếu các tên cố định đều đổi tên, tự động hỏi Google danh sách model khả dụng của Key này
-            if (!successText) {
-                try {
-                    const listRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(geminiKey));
-                    const listData = await listRes.json();
-                    if (Array.isArray(listData.models)) {
-                        const available = listData.models.find(m =>
-                            m.name && m.name.includes('gemini') &&
-                            Array.isArray(m.supportedGenerationMethods) &&
-                            m.supportedGenerationMethods.includes('generateContent')
-                        );
-                        if (available) {
-                            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/' + available.name + ':generateContent?key=' + encodeURIComponent(geminiKey), {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{ parts: [{ text: prompt }] }],
-                                    generationConfig: { temperature: 0.2, maxOutputTokens: 750 }
-                                })
-                            });
-                            const data = await res.json();
-                            if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                                successText = data.candidates[0].content.parts[0].text;
-                            }
-                        }
-                    }
-                } catch (e) {}
             }
 
             if (successText) {
@@ -660,16 +668,393 @@
                 const box = document.getElementById('bulkInput');
                 box.value = (box.value ? box.value + NL : '') + finalOutput;
                 document.getElementById('rootWordInput').value = '';
-                showToast('⚡ Đã khai triển thành công theo từng giới từ!');
+                showToast('⚡ Đã khai triển họ từ & giới từ thành công!');
             } else {
-                showToast('❌ Lỗi AI Key: ' + lastErrorMsg);
+                showToast('❌ Lỗi gọi AI: ' + firstError);
             }
 
             btn.disabled = false;
             btn.textContent = '⚡ Khai triển từ ngay';
         }
 
-        // CLOUD SYNC ENGINE
+        // =========================================================================
+        // 3. HỆ THỐNG BÀI TEST MỞ RỘNG (TEST GIỚI TỪ & TEST LOẠI TỪ / HỌ TỪ)
+        // =========================================================================
+        function extractPreposition(termStr) {
+            const m = String(termStr || '').match(/\[\+\s*([^\]]+)\]/);
+            if (!m) return null;
+            const raw = m[1].trim();
+            if (raw.toLowerCase().includes('không giới từ') || raw === 'N') return 'Ø (Không dùng giới từ / + N)';
+            return raw;
+        }
+
+        function extractPOS(termStr) {
+            const m = String(termStr || '').match(/\((n|v|adj|adv|n\/v|n\/adj)\)/i);
+            return m ? m[1].toLowerCase() : null;
+        }
+
+        function isExpandedWord(item) {
+            return /\((n|v|adj|adv)/i.test(item.term) || /\[\+/.test(item.term);
+        }
+
+        function startTestWithPool(poolType) {
+            document.getElementById('testFilter').value = poolType;
+            switchTab('test');
+        }
+
+        function startTestWithMode(modeType) {
+            document.getElementById('testMode').value = modeType;
+            document.getElementById('testFilter').value = 'expanded';
+            switchTab('test');
+        }
+
+        function addBulkWordsAndTestExpanded() {
+            addBulkWords();
+            document.getElementById('testFilter').value = 'expanded';
+            document.getElementById('testMode').value = 'mc-prep';
+            switchTab('test');
+        }
+
+        function shuffle(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function startNewTest() {
+            const mode = document.getElementById('testMode').value;
+            const filter = document.getElementById('testFilter').value;
+            const limit = parseInt(document.getElementById('testLimit').value) || 20;
+            const quizCard = document.getElementById('quizCard');
+            const emptyState = document.getElementById('quizEmptyState');
+            const poolBadge = document.getElementById('poolBadge');
+            const testWrongBtn = document.getElementById('testWrongNowBtn');
+
+            let pool = [...vocabList];
+            if (filter === 'wrong') {
+                pool = vocabList.filter(w => (w.wrong || 0) > 0);
+            } else if (filter === 'expanded') {
+                pool = vocabList.filter(w => isExpandedWord(w));
+            }
+
+            // Nếu chọn chế độ Test Giới từ thì chỉ lọc các từ có chứa cấu trúc giới từ [+ ...]
+            if (mode === 'mc-prep') {
+                pool = pool.filter(w => extractPreposition(w.term) !== null);
+            } else if (mode === 'mc-pos') {
+                pool = pool.filter(w => extractPOS(w.term) !== null);
+            }
+
+            if (pool.length === 0) {
+                quizCard.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                testWrongBtn.classList.add('hidden');
+                if (mode === 'mc-prep' || mode === 'mc-pos' || filter === 'expanded') {
+                    document.getElementById('emptyStateTitle').textContent = 'Chưa có từ Mở rộng (Giới từ / Loại từ) trong bộ này!';
+                    document.getElementById('emptyStateDesc').textContent = 'Hãy vào mục "➕ Kho từ", bấm "⚡ Khai triển từ ngay" (hoặc "+ Thêm bộ mẫu Giới từ") rồi lưu vào kho để thi chế độ Giới từ & Họ từ nhé.';
+                } else {
+                    document.getElementById('emptyStateTitle').textContent = 'Danh sách đang trống! 🎉';
+                    document.getElementById('emptyStateDesc').textContent = 'Hãy chuyển sang "Kho chung" hoặc thêm từ mới để làm bài Test.';
+                }
+                return;
+            }
+
+            poolBadge.textContent = mode === 'mc-prep' ? '🔗 Đang Test: Điền Giới Từ' :
+                                    mode === 'mc-pos' ? '🏷️ Đang Test: Loại Từ & Họ Từ' :
+                                    filter === 'wrong' ? '🔥 Bộ từ chưa thuộc' :
+                                    filter === 'expanded' ? '✨ Bộ từ Mở rộng' : '🎲 20 từ ngẫu nhiên';
+
+            quizQueue = shuffle(pool).slice(0, limit);
+            currentIndex = 0; correctCount = 0; wrongCount = 0;
+            updateScoreUI();
+            emptyState.classList.add('hidden');
+            quizCard.classList.remove('hidden');
+            renderCurrentQuestion();
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreCorrect').textContent = correctCount;
+            document.getElementById('scoreWrong').textContent = wrongCount;
+        }
+
+        async function renderCurrentQuestion() {
+            if (currentIndex >= quizQueue.length) {
+                document.getElementById('quizCard').classList.add('hidden');
+                document.getElementById('quizEmptyState').classList.remove('hidden');
+                const unlearnedTotal = vocabList.filter(w => (w.wrong || 0) > 0).length;
+                const testWrongBtn = document.getElementById('testWrongNowBtn');
+                if (unlearnedTotal > 0) testWrongBtn.classList.remove('hidden');
+                else testWrongBtn.classList.add('hidden');
+
+                document.getElementById('emptyStateTitle').textContent = 'Hoàn thành! (' + correctCount + '/' + quizQueue.length + ' câu đúng)';
+                document.getElementById('emptyStateDesc').textContent = wrongCount > 0 
+                    ? 'Có ' + wrongCount + ' từ bị sai đã được gom vào "Từ chưa thuộc".' 
+                    : 'Xuất sắc! Bạn không làm sai câu nào.';
+                return;
+            }
+
+            isAnswered = false; hintIndex = 1;
+            const currentItem = quizQueue[currentIndex];
+            const mode = document.getElementById('testMode').value;
+
+            document.getElementById('questionCounter').textContent = 'Câu ' + (currentIndex + 1) + ' / ' + quizQueue.length;
+            document.getElementById('quizProgress').style.width = ((currentIndex / quizQueue.length) * 100) + '%';
+            document.getElementById('feedbackArea').classList.add('hidden');
+            document.getElementById('hintText').textContent = '';
+            const quizPhonetic = document.getElementById('quizPhonetic');
+            const subPrompt = document.getElementById('questionSubPrompt');
+            quizPhonetic.textContent = '';
+            subPrompt.textContent = '';
+
+            const promptEl = document.getElementById('questionPrompt');
+            const speakBtn = document.getElementById('speakBtn');
+            const mcContainer = document.getElementById('mcContainer');
+            const typingContainer = document.getElementById('typingContainer');
+
+            const clean = extractCleanEnglishText(currentItem.term);
+            if (clean && clean.split(' ').length === 1) {
+                fetchWordDictionaryData(clean).then(info => {
+                    if (info.phonetic && mode !== 'mc-vi-en' && mode !== 'type-vi-en') {
+                        quizPhonetic.textContent = info.phonetic;
+                    }
+                });
+            }
+
+            if (mode === 'mc-en-vi') {
+                promptEl.textContent = currentItem.term;
+                speakBtn.classList.remove('hidden');
+                mcContainer.classList.remove('hidden');
+                typingContainer.classList.add('hidden');
+                buildStandardMC(currentItem, 'meaning');
+            } else if (mode === 'mc-vi-en') {
+                promptEl.textContent = currentItem.meaning;
+                speakBtn.classList.add('hidden');
+                mcContainer.classList.remove('hidden');
+                typingContainer.classList.add('hidden');
+                buildStandardMC(currentItem, 'term');
+            } else if (mode === 'mc-prep') {
+                // CHẾ ĐỘ TEST GIỚI TỪ ĐI KÈM: Ẩn giới từ [+ ...] đi để người học chọn
+                const maskedTerm = currentItem.term.replace(/\[\+\s*([^\]]+)\]/g, '[+ ___ ]');
+                promptEl.textContent = maskedTerm;
+                subPrompt.textContent = 'Nghĩa: ' + currentItem.meaning;
+                speakBtn.classList.remove('hidden');
+                mcContainer.classList.remove('hidden');
+                typingContainer.classList.add('hidden');
+                buildPrepositionMC(currentItem);
+            } else if (mode === 'mc-pos') {
+                // CHẾ ĐỘ TEST LOẠI TỪ TRONG HỌ TỪ: Ẩn (n)/(v)/(adj)/(adv)
+                const maskedPOS = currentItem.term.replace(/\((n|v|adj|adv|n\/v|n\/adj)\)/gi, '( ___ )');
+                promptEl.textContent = maskedPOS;
+                subPrompt.textContent = 'Nghĩa: ' + currentItem.meaning;
+                speakBtn.classList.remove('hidden');
+                mcContainer.classList.remove('hidden');
+                typingContainer.classList.add('hidden');
+                buildPOSMC(currentItem);
+            } else {
+                promptEl.textContent = currentItem.meaning;
+                speakBtn.classList.add('hidden');
+                mcContainer.classList.add('hidden');
+                typingContainer.classList.remove('hidden');
+                const input = document.getElementById('typingInput');
+                input.value = ''; input.disabled = false;
+                input.className = "w-full text-center text-lg font-semibold border-2 border-slate-300 rounded-xl p-3 focus:border-indigo-600 outline-none";
+                setTimeout(() => input.focus(), 50);
+            }
+        }
+
+        function buildStandardMC(correctItem, field) {
+            const mcContainer = document.getElementById('mcContainer');
+            mcContainer.innerHTML = '';
+            const others = vocabList.filter(w => w.term.toLowerCase() !== correctItem.term.toLowerCase());
+            const distractors = shuffle(others).slice(0, 3);
+            currentOptions = shuffle([correctItem, ...distractors]);
+
+            currentOptions.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 bg-white text-slate-800 font-medium text-sm sm:text-base flex items-center space-x-3 text-left";
+                btn.innerHTML = '<span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0">' + (idx + 1) + '</span>' +
+                    '<span class="break-words">' + escapeHtml(opt[field]) + '</span>';
+                btn.onclick = () => selectChoiceOption(idx, opt.term === correctItem.term, correctItem);
+                mcContainer.appendChild(btn);
+            });
+        }
+
+        function buildPrepositionMC(correctItem) {
+            const mcContainer = document.getElementById('mcContainer');
+            mcContainer.innerHTML = '';
+            const correctPrep = extractPreposition(correctItem.term);
+            const commonPreps = ['to', 'with', 'for', 'on', 'in', 'from', 'of', 'against', 'into', 'out', 'about', 'at', 'upon', 'Ø (Không dùng giới từ / + N)'];
+            const distractors = shuffle(commonPreps.filter(p => p.toLowerCase() !== correctPrep.toLowerCase())).slice(0, 3);
+            const prepChoices = shuffle([correctPrep, ...distractors]);
+
+            prepChoices.forEach((prep, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 bg-white text-slate-800 font-bold text-sm sm:text-base flex items-center space-x-3 text-left";
+                btn.innerHTML = '<span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">' + (idx + 1) + '</span>' +
+                    '<span class="break-words">+ ' + escapeHtml(prep) + '</span>';
+                btn.dataset.correct = (prep === correctPrep) ? '1' : '0';
+                btn.onclick = () => selectCustomMCOption(idx, prep === correctPrep, correctItem);
+                mcContainer.appendChild(btn);
+            });
+        }
+
+        function buildPOSMC(correctItem) {
+            const mcContainer = document.getElementById('mcContainer');
+            mcContainer.innerHTML = '';
+            const correctPOS = extractPOS(correctItem.term);
+            const posList = [
+                { code: 'n', label: 'Danh từ (n)' },
+                { code: 'v', label: 'Động từ (v)' },
+                { code: 'adj', label: 'Tính từ (adj)' },
+                { code: 'adv', label: 'Trạng từ (adv)' }
+            ];
+
+            posList.forEach((p, idx) => {
+                const isRight = (correctPOS === p.code || (correctPOS && correctPOS.includes(p.code)));
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 bg-white text-slate-800 font-bold text-sm sm:text-base flex items-center space-x-3 text-left";
+                btn.innerHTML = '<span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">' + (idx + 1) + '</span>' +
+                    '<span>' + p.label + '</span>';
+                btn.dataset.correct = isRight ? '1' : '0';
+                btn.onclick = () => selectCustomMCOption(idx, isRight, correctItem);
+                mcContainer.appendChild(btn);
+            });
+        }
+
+        function selectChoiceOption(selectedIndex, isCorrect, currentItem) {
+            if (isAnswered) return;
+            isAnswered = true;
+            const buttons = document.querySelectorAll('#mcContainer button');
+            buttons.forEach((btn, idx) => {
+                const isThisCorrect = currentOptions[idx].term === currentItem.term;
+                if (isThisCorrect) {
+                    btn.className = "option-btn w-full p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-bold text-sm sm:text-base flex items-center space-x-3 text-left";
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.className = "option-btn w-full p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 font-medium text-sm sm:text-base flex items-center space-x-3 text-left";
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            recordResult(currentItem, isCorrect);
+        }
+
+        function selectCustomMCOption(selectedIndex, isCorrect, currentItem) {
+            if (isAnswered) return;
+            isAnswered = true;
+            const buttons = document.querySelectorAll('#mcContainer button');
+            buttons.forEach((btn, idx) => {
+                const isThisCorrect = btn.dataset.correct === '1';
+                if (isThisCorrect) {
+                    btn.className = "option-btn w-full p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-bold text-sm sm:text-base flex items-center space-x-3 text-left";
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.className = "option-btn w-full p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 font-medium text-sm sm:text-base flex items-center space-x-3 text-left";
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            recordResult(currentItem, isCorrect);
+        }
+
+        function checkTypingAnswer() {
+            if (isAnswered) return;
+            const input = document.getElementById('typingInput');
+            const userAns = input.value.trim().toLowerCase();
+            if (!userAns) return;
+            isAnswered = true; input.disabled = true;
+            const currentItem = quizQueue[currentIndex];
+            const fullTerm = currentItem.term.trim().toLowerCase();
+            const baseWord = extractCleanEnglishText(currentItem.term).toLowerCase();
+            const isCorrect = (userAns === fullTerm || userAns === baseWord);
+            input.className = isCorrect
+                ? "w-full text-center text-lg font-bold border-2 border-emerald-500 bg-emerald-50 text-emerald-800 rounded-xl p-3 outline-none"
+                : "w-full text-center text-lg font-bold border-2 border-rose-500 bg-rose-50 text-rose-800 rounded-xl p-3 outline-none";
+            recordResult(currentItem, isCorrect);
+        }
+
+        function showHint() {
+            if (isAnswered) return;
+            const word = extractCleanEnglishText(quizQueue[currentIndex].term).toLowerCase();
+            hintIndex = Math.min(word.length, hintIndex + 1);
+            document.getElementById('hintText').textContent = 'Gợi ý: ' + word.slice(0, hintIndex) + '_'.repeat(Math.max(0, word.length - hintIndex));
+            document.getElementById('typingInput').focus();
+        }
+
+        function recordResult(item, isCorrect) {
+            const masterItem = vocabList.find(w => w.term.toLowerCase() === item.term.toLowerCase());
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            if (isCorrect) {
+                correctCount++;
+                if (masterItem && masterItem.wrong > 0) masterItem.wrong = Math.max(0, masterItem.wrong - 1);
+                feedbackMsg.className = "font-bold text-sm mb-3 text-emerald-600";
+                feedbackMsg.textContent = '✅ Chính xác! ' + item.term + ' — ' + item.meaning;
+            } else {
+                wrongCount++;
+                if (masterItem) masterItem.wrong = (masterItem.wrong || 0) + 1;
+                feedbackMsg.className = "font-bold text-sm mb-3 text-rose-600";
+                feedbackMsg.textContent = '❌ Đã thêm vào "Từ chưa thuộc"! Đáp án: ' + item.term + ' — ' + item.meaning;
+            }
+            speakCleanWord(item.term);
+            saveToStorage();
+            updateScoreUI();
+            renderWordList();
+            renderUnlearnedList();
+            document.getElementById('feedbackArea').classList.remove('hidden');
+        }
+
+        function nextQuestion() { currentIndex++; renderCurrentQuestion(); }
+        function speakCurrentWord() { if (quizQueue[currentIndex]) speakCleanWord(quizQueue[currentIndex].term); }
+
+        // =========================================================================
+        // 4. QUẢN LÝ KHO TỪ, FLASHCARD & ĐỒNG BỘ CLOUD
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAccentButtonUI();
+            loadFromStorage();
+            initFlashcards();
+            renderWordList();
+            renderUnlearnedList();
+
+            cloudKey = localStorage.getItem(CLOUD_KEY_STORAGE) || '';
+            geminiKey = (localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
+            if (geminiKey) {
+                document.getElementById('geminiKeyInput').value = geminiKey;
+                updateAIKeyStatusUI();
+            }
+
+            if (cloudKey) {
+                document.getElementById('cloudKeyInput').value = cloudKey;
+                updateCloudBadge('⏳ Đang đồng bộ...', true);
+                pullFromCloud(true);
+            }
+        });
+
+        function updateAIKeyStatusUI() {
+            const btn = document.getElementById('aiStatusBtn');
+            const st = document.getElementById('geminiKeyStatus');
+            if (geminiKey) {
+                if (btn) {
+                    btn.textContent = '✅ Đã có AI Key';
+                    btn.className = 'text-[11px] bg-emerald-50 border border-emerald-300 text-emerald-700 px-2.5 py-1 rounded-lg font-bold';
+                }
+                if (st) st.textContent = '✅ Đã lưu mã AI Key (Tương thích Gemini 3.8 Flash).';
+            } else {
+                if (btn) {
+                    btn.textContent = '⚙️ Cài AI Key';
+                    btn.className = 'text-[11px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-semibold';
+                }
+                if (st) st.textContent = 'Chưa lưu AI Key.';
+            }
+        }
+
+        function saveGeminiKey() {
+            geminiKey = document.getElementById('geminiKeyInput').value.trim();
+            localStorage.setItem(GEMINI_KEY_STORAGE, geminiKey);
+            updateAIKeyStatusUI();
+            showToast('✅ Đã lưu mã Gemini AI Key!');
+        }
+
         function updateCloudBadge(text, isConnected) {
             const badge = document.getElementById('cloudStatusBadge');
             const detail = document.getElementById('syncDetailStatus');
@@ -767,17 +1152,17 @@
         }
 
         function forceRefreshApp() {
-            showToast('🔄 Đang làm mới App...');
+            showToast('🔄 Đang cập nhật phiên bản mới...');
             setTimeout(() => {
-                window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
-            }, 300);
+                window.location.replace(window.location.pathname + '?v=' + Date.now());
+            }, 250);
         }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0');
-            setTimeout(() => t.classList.add('opacity-0'), 3200);
+            setTimeout(() => t.classList.add('opacity-0'), 3500);
         }
 
         function saveToStorage() {
@@ -796,7 +1181,8 @@
 
         function updateHeaderStats() {
             const wrongTotal = vocabList.filter(w => (w.wrong || 0) > 0).length;
-            document.getElementById('headerStats').textContent = vocabList.length + ' từ trong kho • ' + wrongTotal + ' chưa thuộc';
+            const expandedTotal = vocabList.filter(w => isExpandedWord(w)).length;
+            document.getElementById('headerStats').textContent = vocabList.length + ' từ (' + expandedTotal + ' mở rộng) • ' + wrongTotal + ' chưa thuộc';
             document.getElementById('wordCount').textContent = vocabList.length;
             document.getElementById('unlearnedBadge').textContent = wrongTotal;
             document.getElementById('unlearnedCountText').textContent = wrongTotal;
@@ -815,10 +1201,11 @@
             if (tab === 'input') updateAIKeyStatusUI();
         }
 
-        // FLASHCARD
         function initFlashcards() {
             const filter = document.getElementById('fcFilter').value;
-            fcList = filter === 'wrong' ? vocabList.filter(w => (w.wrong || 0) > 0) : [...vocabList];
+            if (filter === 'wrong') fcList = vocabList.filter(w => (w.wrong || 0) > 0);
+            else if (filter === 'expanded') fcList = vocabList.filter(w => isExpandedWord(w));
+            else fcList = [...vocabList];
             fcIndex = 0;
             renderFlashcard();
         }
@@ -845,8 +1232,8 @@
             const phoneticEl = document.getElementById('fcPhonetic');
 
             if (fcList.length === 0) {
-                document.getElementById('fcTerm').textContent = 'Chưa có thẻ nào';
-                document.getElementById('fcMeaning').textContent = 'Hãy vào mục ➕ Kho từ để thêm từ vựng';
+                document.getElementById('fcTerm').textContent = 'Chưa có thẻ nào ở mục này';
+                document.getElementById('fcMeaning').textContent = 'Hãy vào mục ➕ Kho từ để khai triển hoặc thêm từ vựng';
                 document.getElementById('fcTermSub').textContent = '';
                 document.getElementById('fcCounter').textContent = '0 / 0';
                 phoneticEl.textContent = 'MẶT TRƯỚC';
@@ -888,207 +1275,6 @@
         function speakFCText() { if (fcList[fcIndex]) speakCleanWord(fcList[fcIndex].term); }
         function startFlashcardWithPool(pool) { document.getElementById('fcFilter').value = pool; switchTab('flashcard'); }
 
-        // QUIZ
-        function startTestWithPool(poolType) { document.getElementById('testFilter').value = poolType; switchTab('test'); }
-
-        function shuffle(arr) {
-            const copy = [...arr];
-            for (let i = copy.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [copy[i], copy[j]] = [copy[j], copy[i]];
-            }
-            return copy;
-        }
-
-        function startNewTest() {
-            const filter = document.getElementById('testFilter').value;
-            const limit = parseInt(document.getElementById('testLimit').value) || 20;
-            const quizCard = document.getElementById('quizCard');
-            const emptyState = document.getElementById('quizEmptyState');
-            const poolBadge = document.getElementById('poolBadge');
-            const testWrongBtn = document.getElementById('testWrongNowBtn');
-
-            if (vocabList.length < 4) {
-                quizCard.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                testWrongBtn.classList.add('hidden');
-                document.getElementById('emptyStateTitle').textContent = 'Cần ít nhất 4 từ trong kho';
-                document.getElementById('emptyStateDesc').textContent = 'Hãy thêm từ vựng ở mục ➕ Kho từ để bắt đầu.';
-                return;
-            }
-
-            let pool = filter === 'wrong' ? vocabList.filter(w => (w.wrong || 0) > 0) : [...vocabList];
-            if (pool.length === 0) {
-                quizCard.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                testWrongBtn.classList.add('hidden');
-                document.getElementById('emptyStateTitle').textContent = 'Bộ "Từ chưa thuộc" đang trống! 🎉';
-                document.getElementById('emptyStateDesc').textContent = 'Bạn đã thuộc hết các từ vựng.';
-                return;
-            }
-
-            poolBadge.textContent = filter === 'wrong' ? '🔥 Bộ từ chưa thuộc' : '🎲 20 từ ngẫu nhiên';
-            quizQueue = shuffle(pool).slice(0, limit);
-            currentIndex = 0; correctCount = 0; wrongCount = 0;
-            updateScoreUI();
-            emptyState.classList.add('hidden');
-            quizCard.classList.remove('hidden');
-            renderCurrentQuestion();
-        }
-
-        function updateScoreUI() {
-            document.getElementById('scoreCorrect').textContent = correctCount;
-            document.getElementById('scoreWrong').textContent = wrongCount;
-        }
-
-        async function renderCurrentQuestion() {
-            if (currentIndex >= quizQueue.length) {
-                document.getElementById('quizCard').classList.add('hidden');
-                document.getElementById('quizEmptyState').classList.remove('hidden');
-                const unlearnedTotal = vocabList.filter(w => (w.wrong || 0) > 0).length;
-                const testWrongBtn = document.getElementById('testWrongNowBtn');
-                if (unlearnedTotal > 0) testWrongBtn.classList.remove('hidden');
-                else testWrongBtn.classList.add('hidden');
-
-                document.getElementById('emptyStateTitle').textContent = 'Hoàn thành! (' + correctCount + '/' + quizQueue.length + ' câu đúng)';
-                document.getElementById('emptyStateDesc').textContent = wrongCount > 0 
-                    ? 'Có ' + wrongCount + ' từ bị sai đã được gom vào "Từ chưa thuộc".' 
-                    : 'Xuất sắc! Bạn không làm sai câu nào.';
-                return;
-            }
-
-            isAnswered = false; hintIndex = 1;
-            const currentItem = quizQueue[currentIndex];
-            const mode = document.getElementById('testMode').value;
-
-            document.getElementById('questionCounter').textContent = 'Câu ' + (currentIndex + 1) + ' / ' + quizQueue.length;
-            document.getElementById('quizProgress').style.width = ((currentIndex / quizQueue.length) * 100) + '%';
-            document.getElementById('feedbackArea').classList.add('hidden');
-            document.getElementById('hintText').textContent = '';
-            const quizPhonetic = document.getElementById('quizPhonetic');
-            quizPhonetic.textContent = '';
-
-            const promptEl = document.getElementById('questionPrompt');
-            const speakBtn = document.getElementById('speakBtn');
-            const mcContainer = document.getElementById('mcContainer');
-            const typingContainer = document.getElementById('typingContainer');
-
-            // Tải sẵn file MP3 ngay khi câu hỏi hiện ra để lúc bấm trả lời phát được tức thì trên iPad
-            const clean = extractCleanEnglishText(currentItem.term);
-            if (clean && clean.split(' ').length === 1) {
-                fetchWordDictionaryData(clean).then(info => {
-                    if (info.phonetic && mode === 'mc-en-vi') quizPhonetic.textContent = info.phonetic;
-                });
-            }
-
-            if (mode === 'mc-en-vi') {
-                promptEl.textContent = currentItem.term;
-                speakBtn.classList.remove('hidden');
-                mcContainer.classList.remove('hidden');
-                typingContainer.classList.add('hidden');
-                buildMultipleChoice(currentItem, 'meaning');
-            } else if (mode === 'mc-vi-en') {
-                promptEl.textContent = currentItem.meaning;
-                speakBtn.classList.add('hidden');
-                mcContainer.classList.remove('hidden');
-                typingContainer.classList.add('hidden');
-                buildMultipleChoice(currentItem, 'term');
-            } else {
-                promptEl.textContent = currentItem.meaning;
-                speakBtn.classList.add('hidden');
-                mcContainer.classList.add('hidden');
-                typingContainer.classList.remove('hidden');
-                const input = document.getElementById('typingInput');
-                input.value = ''; input.disabled = false;
-                input.className = "w-full text-center text-lg font-semibold border-2 border-slate-300 rounded-xl p-3 focus:border-indigo-600 outline-none";
-                setTimeout(() => input.focus(), 50);
-            }
-        }
-
-        function buildMultipleChoice(correctItem, field) {
-            const mcContainer = document.getElementById('mcContainer');
-            mcContainer.innerHTML = '';
-            const distractors = shuffle(vocabList.filter(w => w.term.toLowerCase() !== correctItem.term.toLowerCase())).slice(0, 3);
-            currentOptions = shuffle([correctItem, ...distractors]);
-
-            currentOptions.forEach((opt, idx) => {
-                const btn = document.createElement('button');
-                btn.className = "option-btn w-full p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 bg-white text-slate-800 font-medium text-sm sm:text-base flex items-center space-x-3 text-left";
-                btn.innerHTML = '<span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0">' + (idx + 1) + '</span>' +
-                    '<span class="break-words">' + escapeHtml(opt[field]) + '</span>';
-                btn.onclick = () => selectMCOption(idx, opt.term === correctItem.term);
-                mcContainer.appendChild(btn);
-            });
-        }
-
-        function selectMCOption(selectedIndex, isCorrect) {
-            if (isAnswered) return;
-            isAnswered = true;
-            const currentItem = quizQueue[currentIndex];
-            const buttons = document.querySelectorAll('#mcContainer button');
-
-            buttons.forEach((btn, idx) => {
-                const isThisCorrect = currentOptions[idx].term === currentItem.term;
-                if (isThisCorrect) {
-                    btn.className = "option-btn w-full p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-bold text-sm sm:text-base flex items-center space-x-3 text-left";
-                } else if (idx === selectedIndex && !isCorrect) {
-                    btn.className = "option-btn w-full p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 font-medium text-sm sm:text-base flex items-center space-x-3 text-left";
-                } else {
-                    btn.classList.add('opacity-50');
-                }
-            });
-            recordResult(currentItem, isCorrect);
-        }
-
-        function checkTypingAnswer() {
-            if (isAnswered) return;
-            const input = document.getElementById('typingInput');
-            const userAns = input.value.trim().toLowerCase();
-            if (!userAns) return;
-            isAnswered = true; input.disabled = true;
-            const currentItem = quizQueue[currentIndex];
-            const fullTerm = currentItem.term.trim().toLowerCase();
-            const baseWord = extractCleanEnglishText(currentItem.term).toLowerCase();
-            const isCorrect = (userAns === fullTerm || userAns === baseWord);
-            input.className = isCorrect
-                ? "w-full text-center text-lg font-bold border-2 border-emerald-500 bg-emerald-50 text-emerald-800 rounded-xl p-3 outline-none"
-                : "w-full text-center text-lg font-bold border-2 border-rose-500 bg-rose-50 text-rose-800 rounded-xl p-3 outline-none";
-            recordResult(currentItem, isCorrect);
-        }
-
-        function showHint() {
-            if (isAnswered) return;
-            const word = extractCleanEnglishText(quizQueue[currentIndex].term).toLowerCase();
-            hintIndex = Math.min(word.length, hintIndex + 1);
-            document.getElementById('hintText').textContent = 'Gợi ý: ' + word.slice(0, hintIndex) + '_'.repeat(Math.max(0, word.length - hintIndex));
-            document.getElementById('typingInput').focus();
-        }
-
-        function recordResult(item, isCorrect) {
-            const masterItem = vocabList.find(w => w.term.toLowerCase() === item.term.toLowerCase());
-            const feedbackMsg = document.getElementById('feedbackMessage');
-            if (isCorrect) {
-                correctCount++;
-                if (masterItem && masterItem.wrong > 0) masterItem.wrong = Math.max(0, masterItem.wrong - 1);
-                feedbackMsg.className = "font-bold text-sm mb-3 text-emerald-600";
-                feedbackMsg.textContent = '✅ Chính xác! ' + item.term + ' — ' + item.meaning;
-            } else {
-                wrongCount++;
-                if (masterItem) masterItem.wrong = (masterItem.wrong || 0) + 1;
-                feedbackMsg.className = "font-bold text-sm mb-3 text-rose-600";
-                feedbackMsg.textContent = '❌ Đã thêm vào "Từ chưa thuộc"! Đáp án: ' + item.term + ' — ' + item.meaning;
-            }
-            speakCleanWord(item.term);
-            saveToStorage();
-            updateScoreUI();
-            renderWordList();
-            renderUnlearnedList();
-            document.getElementById('feedbackArea').classList.remove('hidden');
-        }
-
-        function nextQuestion() { currentIndex++; renderCurrentQuestion(); }
-        function speakCurrentWord() { if (quizQueue[currentIndex]) speakCleanWord(quizQueue[currentIndex].term); }
-
         function parseInputText(rawText) {
             const NL = String.fromCharCode(10);
             const TAB = String.fromCharCode(9);
@@ -1100,7 +1286,7 @@
                 let parts = [];
                 if (line.includes(TAB)) parts = line.split(TAB);
                 else if (line.includes(' - ')) parts = line.split(' - ');
-                else if (line.includes(':')) parts = line.split(':');
+                else if (line.includes(': ')) parts = line.split(': ');
                 else if (line.includes('-')) parts = line.split('-');
                 if (parts.length >= 2) {
                     const term = parts[0].trim();
@@ -1114,7 +1300,7 @@
         function addBulkWords() {
             const box = document.getElementById('bulkInput');
             const items = parseInputText(box.value);
-            if (items.length === 0) return showToast('⚠️ Hãy nhập đúng cú pháp: từ - nghĩa');
+            if (items.length === 0) return showToast('⚠️ Hãy nhập hoặc khai triển từ trước khi lưu!');
             let addedCount = 0, mergedCount = 0;
 
             items.forEach(item => {
@@ -1133,20 +1319,26 @@
             saveToStorage();
             renderWordList();
             initFlashcards();
-            showToast('✅ Đã thêm ' + addedCount + ' từ mới' + (mergedCount > 0 ? ' & gộp nghĩa ' + mergedCount + ' từ!' : '!'));
+            showToast('✅ Đã lưu ' + addedCount + ' từ mới' + (mergedCount > 0 ? ' & gộp nghĩa ' + mergedCount + ' từ!' : '!'));
         }
 
         function loadSampleWords() {
             const NL = String.fromCharCode(10);
             const sample = [
-                "adapt (v) [+ to] - thích nghi với môi trường mới",
+                "work (v) [+ on] - tập trung nghiên cứu, cải thiện một dự án",
+                "work (v) [+ for] - làm việc cho một tổ chức hoặc mục tiêu",
+                "work (v) [+ as] - làm nghề gì với tư cách là",
+                "work (v) [+ out] - tìm ra giải pháp, tính toán hoặc tập luyện",
+                "workable (adj) [+ for] - khả thi, có thể áp dụng thực tế",
+                "adapt (v) [+ to] - thích nghi với hoàn cảnh mới",
                 "adapt (v) [+ for] - cải biên để phù hợp với mục đích mới",
-                "conform (v) [+ to / with] - tuân theo quy chuẩn xã hội",
-                "mitigate (v) [+ N] - giảm thiểu rủi ro, xoa dịu hậu quả",
-                "resilient (adj) [+ to] - kiên cường, có sức chống chịu trước"
+                "adapt (v) [+ from] - chuyển thể từ một tác phẩm gốc",
+                "conform (v) [+ to] - tuân theo quy chuẩn xã hội",
+                "contend (v) [+ with] - phải đương đầu, vật lộn với khó khăn",
+                "contend (v) [+ for] - cạnh tranh để giành lấy vị trí"
             ].join(NL);
             document.getElementById('bulkInput').value = sample;
-            addBulkWords();
+            showToast('✨ Đã điền mẫu Họ từ & Giới từ! Hãy bấm nút Lưu bên dưới.');
         }
 
         function deleteWord(index) {
